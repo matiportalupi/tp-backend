@@ -26,15 +26,8 @@ public class TarifaService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${servicio.camiones.url}")
-    private String camionesBaseUrl;
-
-    @Value("${servicio.contenedores.url}")
-    private String contenedoresBaseUrl;
-
-    @Value("${servicio.depositos.url}")
-    private String depositosBaseUrl;
-
+    @Value("${servicio.pedidos.url:http://localhost:8082/api/pedidos}")
+    private String baseUrl;
     @Autowired
     private TarifaRepository tarifaRepo;
 
@@ -42,8 +35,8 @@ public class TarifaService {
         try {
             String token = autHeader.replace("Bearer ", "");
             RestTemplate restTemplate = RestTemplateFactory.conToken(token);
-            String urlCamion = camionesBaseUrl + "/camiones/" + camionId;
-            String urlContenedor = contenedoresBaseUrl + "/contenedores/" + contenedorId;
+            String urlCamion = baseUrl + "/camiones/" + camionId;
+            String urlContenedor = baseUrl + "/contenedores/" + contenedorId;
 
             CamionDto camion = restTemplate.getForObject(urlCamion, CamionDto.class);
             ContenedorDto contenedor = restTemplate.getForObject(urlContenedor, ContenedorDto.class);
@@ -73,9 +66,11 @@ public class TarifaService {
             return 200;
     }
 
-    public boolean esDeposito(Long id) {
+    public boolean esDeposito(Long id, String autHeader) {
         try {
-            String url = depositosBaseUrl + "/depositos/" + id + "/dto";
+            String token = autHeader.replace("Bearer ", "");
+            RestTemplate restTemplate = RestTemplateFactory.conToken(token);
+            String url = baseUrl + "/depositos/" + id + "/dto";
             restTemplate.getForObject(url, DepositoDto.class);
             return true;
         } catch (Exception e) {
@@ -134,7 +129,7 @@ public class TarifaService {
                 Long depositoIdActual = tramo.getUbicacionOrigenId();
 
                 if (depositoIdAnterior != null && depositoIdAnterior.equals(depositoIdActual)
-                        && esDeposito(depositoIdAnterior)) {
+                        && esDeposito(depositoIdAnterior, autHeader)) {
                     LocalDate llegada = tramoAnterior.getFechaRealLlegada();
                     LocalDate salida = tramo.getFechaRealSalida();
 

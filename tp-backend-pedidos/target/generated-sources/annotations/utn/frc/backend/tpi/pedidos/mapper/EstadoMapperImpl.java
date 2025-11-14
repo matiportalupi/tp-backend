@@ -9,8 +9,8 @@ import utn.frc.backend.tpi.pedidos.models.Estado;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-13T19:39:43-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-14T19:03:33-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.7 (Oracle Corporation)"
 )
 @Component
 public class EstadoMapperImpl implements EstadoMapper {
@@ -21,10 +21,11 @@ public class EstadoMapperImpl implements EstadoMapper {
             return null;
         }
 
-        EstadoDTO estadoDTO = new EstadoDTO();
+        Estado estado1 = null;
 
-        estadoDTO.setId( estado.getId() );
-        estadoDTO.setNombre( estado.getNombre() );
+        estado1 = estado;
+
+        EstadoDTO estadoDTO = new EstadoDTO( estado1 );
 
         return estadoDTO;
     }
@@ -36,9 +37,6 @@ public class EstadoMapperImpl implements EstadoMapper {
         }
 
         Estado estado = new Estado();
-
-        estado.setId( dto.getId() );
-        estado.setNombre( dto.getNombre() );
 
         return estado;
     }

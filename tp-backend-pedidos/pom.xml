@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>tpi-2025-grupo12-pedidos</artifactId>
+	<artifactId>tp-backend-pedidos</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>&quot;tpi-2025-grupo12-pedidos&quot;</name>
+	<name>&quot;tp-backend-pedidos&quot;</name>
 	<description>trabajo integrador de backend Pedidos</description>
 	<url/>
 	<licenses>
@@ -126,4 +126,3 @@
 	</build>
 
 </project>
-

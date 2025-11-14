@@ -9,8 +9,8 @@ import utn.frc.backend.tpi.logistica.models.Tarifa;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-13T20:45:42-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.7 (Oracle Corporation)"
+    date = "2025-11-14T18:49:22-0300",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
 )
 @Component
 public class TarifaMapperImpl implements TarifaMapper {
@@ -22,6 +22,10 @@ public class TarifaMapperImpl implements TarifaMapper {
         }
 
         TarifaDto tarifaDto = new TarifaDto();
+
+        tarifaDto.setCostoPorKm( tarifa.getCostoPorKm() );
+        tarifaDto.setId( tarifa.getId() );
+        tarifaDto.setMontoBase( tarifa.getMontoBase() );
 
         return tarifaDto;
     }
@@ -47,6 +51,10 @@ public class TarifaMapperImpl implements TarifaMapper {
         }
 
         Tarifa tarifa = new Tarifa();
+
+        tarifa.setCostoPorKm( dto.getCostoPorKm() );
+        tarifa.setId( dto.getId() );
+        tarifa.setMontoBase( dto.getMontoBase() );
 
         return tarifa;
     }

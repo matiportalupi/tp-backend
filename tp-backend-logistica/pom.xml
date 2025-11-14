@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>tpi-2025-grupo12-logistica</artifactId>
+	<artifactId>tp-backend-logistica</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>&quot;tpi-2025-grupo12-logistica&quot;</name>
+	<name>&quot;tp-backend-logistica&quot;</name>
 	<description>trabajo integrador de backend</description>
 	<url/>
 	<licenses>

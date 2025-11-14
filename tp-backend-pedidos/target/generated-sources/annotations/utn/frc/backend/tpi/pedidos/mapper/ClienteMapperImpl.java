@@ -10,8 +10,8 @@ import utn.frc.backend.tpi.pedidos.models.Cliente;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-13T19:39:43-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-14T19:03:33-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.7 (Oracle Corporation)"
 )
 @Component
 public class ClienteMapperImpl implements ClienteMapper {
@@ -24,10 +24,6 @@ public class ClienteMapperImpl implements ClienteMapper {
 
         ClienteResponseDTO clienteResponseDTO = new ClienteResponseDTO();
 
-        clienteResponseDTO.setEmail( cliente.getEmail() );
-        clienteResponseDTO.setId( cliente.getId() );
-        clienteResponseDTO.setNombre( cliente.getNombre() );
-
         return clienteResponseDTO;
     }
 
@@ -38,10 +34,6 @@ public class ClienteMapperImpl implements ClienteMapper {
         }
 
         Cliente cliente = new Cliente();
-
-        cliente.setEmail( dto.getEmail() );
-        cliente.setNombre( dto.getNombre() );
-        cliente.setPassword( dto.getPassword() );
 
         return cliente;
     }

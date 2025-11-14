@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: tpi-2025-grupo12-logistica
+    name: tp-backend-logistica
   datasource:
     url: jdbc:h2:file:./data/tpiDb-logistica
     driver-class-name: org.h2.Driver
