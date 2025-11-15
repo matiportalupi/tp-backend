@@ -34,12 +34,21 @@ google:
   maps: 
     apikey: AIzaSyDAXcMocfHcz1ipvHOYP4L9iBqTfw9VroE
 
+distancias:
+  provider: ${DISTANCIAS_PROVIDER:osrm}
+
+osrm:
+  api:
+    url: ${OSRM_API_URL:https://router.project-osrm.org}
+
 servicio:
   ciudades:
-    url: http://localhost:8082/api/pedidos
+    url: ${SERVICIO_CIUDADES_URL:http://localhost:8082/api/pedidos}
   depositos:
-    url: http://localhost:8082/api/pedidos
+    url: ${SERVICIO_DEPOSITOS_URL:http://localhost:8082/api/pedidos}
   camiones:
-    url: http://localhost:8082/api/pedidos
+    url: ${SERVICIO_CAMIONES_URL:http://localhost:8082/api/pedidos}
   contenedores:
-    url: http://localhost:8082/api/pedidos
+    url: ${SERVICIO_CONTENEDORES_URL:http://localhost:8082/api/pedidos}
+  pedidos:
+    url: ${SERVICIO_PEDIDOS_URL:http://localhost:8082/api/pedidos}

@@ -191,6 +191,7 @@ public class TramoRutaService {
                 // TODO: Se necesita una forma de obtener un token válido aquí.
                 // double costoReal = tarifaService.calcularTarifaSolicitud(solicitud, "Bearer fake-token");
                 // solicitud.setCostoEstimado(costoReal);
+                double costoReal = solicitud.getCostoEstimado();
                 solicitud.setCostoEstimado(costoReal);
             } catch (Exception e) {
                 System.err.println("Error al calcular el costo real: " + e.getMessage());

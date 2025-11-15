@@ -1,15 +1,54 @@
-
-services: 
-  keycloak: 
-    image: quay.io/keycloak/keycloak:24.0.3 
-    container_name: keycloak 
-    command: start-dev 
-    ports: 
-      - "8083:8080" 
-    environment: 
-      - KEYCLOAK_ADMIN=admin 
-      - KEYCLOAK_ADMIN_PASSWORD=admin123 
-    volumes: 
-      - keycloak_data:/opt/keycloak/data 
-volumes: 
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    container_name: keycloak
+    command: start-dev
+    ports:
+      - "8083:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+  pedidos:
+    build:
+      context: ../tp-backend-pedidos
+    container_name: pedidos
+    depends_on:
+      - keycloak
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../tp-backend-pedidos/data:/app/data
+  logistica:
+    build:
+      context: ../tp-backend-logistica
+    container_name: logistica
+    depends_on:
+      - pedidos
+    environment:
+      SERVICIO_CIUDADES_URL: http://gateway:8082/api/pedidos
+      SERVICIO_DEPOSITOS_URL: http://gateway:8082/api/pedidos
+      SERVICIO_CAMIONES_URL: http://gateway:8082/api/pedidos
+      SERVICIO_CONTENEDORES_URL: http://gateway:8082/api/pedidos
+      SERVICIO_PEDIDOS_URL: http://gateway:8082/api/pedidos
+    ports:
+      - "8081:8081"
+    volumes:
+      - ../tp-backend-logistica/data:/app/data
+  gateway:
+    build:
+      context: ../gateway
+    container_name: gateway
+    depends_on:
+      - pedidos
+      - logistica
+      - keycloak
+    environment:
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      PEDIDOS_SERVICE_URI: http://pedidos:8080
+      LOGISTICA_SERVICE_URI: http://logistica:8081
+    ports:
+      - "8082:8082"
+volumes:
   keycloak_data:

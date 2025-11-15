@@ -16,8 +16,14 @@ import utn.frc.backend.tpi.logistica.interfaces.Ubicable;
 @RequiredArgsConstructor
 public class GeoService {
 
-    @Value("${google.maps.apikey}")
+    @Value("${google.maps.apikey:}")
     private String apiKey;
+
+    @Value("${distancias.provider:osrm}")
+    private String proveedorDistancias;
+
+    @Value("${osrm.api.url:https://router.project-osrm.org}")
+    private String osrmApiUrl;
 
     private final RestTemplate restTemplate;
 
@@ -147,8 +153,15 @@ public class GeoService {
         return dto;
     }
 
-    // Método privado que hace el cálculo real con Google Maps
     private TramoRutaDto calcularDistanciaEntreUbicables(Ubicable origen, Ubicable destino) throws Exception {
+        if ("google".equalsIgnoreCase(proveedorDistancias) && apiKey != null && !apiKey.isBlank()) {
+            return calcularConGoogleMaps(origen, destino);
+        }
+        return calcularConOsrm(origen, destino);
+    }
+
+    // Método privado que hace el cálculo real con Google Maps
+    private TramoRutaDto calcularConGoogleMaps(Ubicable origen, Ubicable destino) throws Exception {
         String origenStr = origen.getLatitud() + "," + origen.getLongitud();
         String destinoStr = destino.getLatitud() + "," + destino.getLongitud();
 
@@ -165,6 +178,33 @@ public class GeoService {
         dto.setDistancia(leg.path("distance").path("value").asDouble() / 1000); // km
         dto.setTiempoEstimado(leg.path("duration").path("value").asDouble() / 3600.0); // horas
 
+        return dto;
+    }
+
+    // Método alternativo usando OSRM (por defecto)
+    private TramoRutaDto calcularConOsrm(Ubicable origen, Ubicable destino) throws Exception {
+        String url = String.format(
+                "%s/route/v1/driving/%s,%s;%s,%s?overview=false&alternatives=false&steps=false",
+                osrmApiUrl,
+                origen.getLongitud(), origen.getLatitud(),
+                destino.getLongitud(), destino.getLatitud());
+
+        String response = restTemplate.getForObject(url, String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(response);
+
+        if (!"Ok".equalsIgnoreCase(root.path("code").asText())) {
+            throw new IllegalStateException("Respuesta inválida de OSRM: " + response);
+        }
+
+        JsonNode route = root.path("routes").get(0);
+        if (route == null || route.isMissingNode()) {
+            throw new IllegalStateException("OSRM no devolvió rutas para los puntos solicitados.");
+        }
+
+        TramoRutaDto dto = new TramoRutaDto();
+        dto.setDistancia(route.path("distance").asDouble() / 1000.0); // km
+        dto.setTiempoEstimado(route.path("duration").asDouble() / 3600.0); // horas
         return dto;
     }
 }

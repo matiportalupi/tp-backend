@@ -6,20 +6,20 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8083/realms/tpi-backend
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8083/realms/tpi-backend}
 
   cloud:
     gateway:
       routes:
         - id: pedidos-service
-          uri: http://localhost:8080
+          uri: ${PEDIDOS_SERVICE_URI:http://localhost:8080}
           predicates:
             - Path=/api/pedidos/**
           filters:
             - StripPrefix=2
 
         - id: logistica-service
-          uri: http://localhost:8081
+          uri: ${LOGISTICA_SERVICE_URI:http://localhost:8081}
           predicates:
             - Path=/api/logistica/**
           filters:
@@ -31,4 +31,3 @@ server:
 
 seguridad:
   desactivada: true
-

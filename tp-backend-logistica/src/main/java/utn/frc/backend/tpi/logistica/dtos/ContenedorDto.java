@@ -14,5 +14,5 @@ public class ContenedorDto {
     private double peso;
     private double volumen;
     private EstadoDto estado;
-    private Long clienteId;
+    private ClienteDto cliente;
 }

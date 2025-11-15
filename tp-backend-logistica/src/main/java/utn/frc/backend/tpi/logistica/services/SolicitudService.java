@@ -57,6 +57,13 @@ public class SolicitudService {
         }
     }
 
+    private void validarContenedorTieneCliente(ContenedorDto contenedor) {
+        if (contenedor.getCliente() == null || contenedor.getCliente().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El contenedor no tiene un cliente asociado, no se puede generar la ruta.");
+        }
+    }
+
     public Solicitud crearPeticionTraslado(Solicitud solicitud, String autHeader){
 
         String token = autHeader.replace("Bearer ", "");
@@ -66,6 +73,8 @@ public class SolicitudService {
         ContenedorDto contenedor = restTemplate.getForObject(contenedorUrl, ContenedorDto.class);
         if (contenedor == null)
             throw new RuntimeException("Contenedor no encontrado");
+
+        validarContenedorTieneCliente(contenedor);
 
         // 2. Validar que el contenedor no esté ya asignado a otra solicitud
         Optional<Solicitud> existente = solicitudRepo.findByContenedorId(solicitud.getContenedorId());
@@ -89,6 +98,8 @@ public class SolicitudService {
         ContenedorDto contenedor = restTemplate.getForObject(contenedorUrl, ContenedorDto.class);
         if (contenedor == null)
             throw new RuntimeException("Contenedor no encontrado");
+
+        validarContenedorTieneCliente(contenedor);
 
         // 3. Obtener camión
         String camionUrl = baseUrl + "/camiones/" + solicitud.getCamionId();

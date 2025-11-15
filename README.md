@@ -1,4 +1,3 @@
-# Backend de gestión de logística terrestre de contendedores 🛣️🚚📍
 
 Este backend gestiona las solicitudes de transporte de contendedores realizada por un cleinte, generando todas las funcionalidades necesarias para calcular la ruta mas eficiente y el seguimiento del contendedor, además de generar reportes sobre el desempeño del servicio.
 

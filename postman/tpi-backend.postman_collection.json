@@ -1,0 +1,392 @@
+{
+  "info": {
+    "name": "TP Backend - Coleccion",
+    "description": "Coleccion de Postman para probar los microservicios Pedidos, Logistica y Gateway a traves del gateway (puerto 8082).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {"key": "gateway_base", "value": "http://localhost:8082"},
+    {"key": "pedidos_base", "value": "{{gateway_base}}/api/pedidos"},
+    {"key": "logistica_base", "value": "{{gateway_base}}/api/logistica"},
+    {"key": "keycloak_base", "value": "http://localhost:8083"},
+    {"key": "realm", "value": "tpi-backend"},
+    {"key": "client_id", "value": "backend"},
+    {"key": "username", "value": "admin01"},
+    {"key": "password", "value": "admin123"},
+    {"key": "access_token", "value": ""},
+    {"key": "ciudad_id", "value": "1"},
+    {"key": "camion_id", "value": "1"},
+    {"key": "cliente_id", "value": "1"},
+    {"key": "deposito_id", "value": "1"},
+    {"key": "estado_id", "value": "1"},
+    {"key": "contenedor_id", "value": "1"},
+    {"key": "solicitud_id", "value": "1"},
+    {"key": "tarifa_id", "value": "1"},
+    {"key": "tramo_id", "value": "1"}
+  ],
+  "item": [
+    {
+      "name": "Keycloak",
+      "item": [
+        {
+          "name": "Obtener token",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/x-www-form-urlencoded"}
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {"key": "client_id", "value": "{{client_id}}"},
+                {"key": "grant_type", "value": "password"},
+                {"key": "username", "value": "{{username}}"},
+                {"key": "password", "value": "{{password}}"}
+              ]
+            },
+            "url": "{{keycloak_base}}/realms/{{realm}}/protocol/openid-connect/token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  pm.collectionVariables.set('access_token', json.access_token);",
+                  "  console.log('Token actualizado en access_token');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "description": "Endpoints expuestos bajo {{pedidos_base}}",
+      "item": [
+        {
+          "name": "Ciudades",
+          "item": [
+            {
+              "name": "Listar ciudades",
+              "request": {"method": "GET", "url": "{{pedidos_base}}/ciudades"}
+            },
+            {
+              "name": "Obtener ciudad por ID",
+              "request": {"method": "GET", "url": "{{pedidos_base}}/ciudades/{{ciudad_id}}"}
+            },
+            {
+              "name": "Crear ciudad",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Cordoba\",\n  \"latitud\": -31.417,\n  \"longitud\": -64.183\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
+                "url": "{{pedidos_base}}/ciudades"
+              }
+            },
+            {
+              "name": "Actualizar ciudad",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Rosario\",\n  \"latitud\": -32.958,\n  \"longitud\": -60.693\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
+                "url": "{{pedidos_base}}/ciudades/{{ciudad_id}}"
+              }
+            },
+            {
+              "name": "Eliminar ciudad",
+              "request": {"method": "DELETE", "url": "{{pedidos_base}}/ciudades/{{ciudad_id}}"}
+            }
+          ]
+        },
+        {
+          "name": "Camiones",
+          "item": [
+            {"name": "Listar camiones", "request": {"method": "GET", "url": "{{pedidos_base}}/camiones"}},
+            {"name": "Obtener camion", "request": {"method": "GET", "url": "{{pedidos_base}}/camiones/{{camion_id}}"}},
+            {
+              "name": "Crear camion",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"capacidadPeso\": 15000,\n  \"volumen\": 60,\n  \"disponibilidad\": true\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/camiones"
+              }
+            },
+            {
+              "name": "Actualizar camion",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"capacidadPeso\": 18000,\n  \"volumen\": 65,\n  \"disponibilidad\": false\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/camiones/{{camion_id}}"
+              }
+            },
+            {"name": "Eliminar camion", "request": {"method": "DELETE", "url": "{{pedidos_base}}/camiones/{{camion_id}}"}}
+          ]
+        },
+        {
+          "name": "Clientes",
+          "item": [
+            {"name": "Listar clientes", "request": {"method": "GET", "url": "{{pedidos_base}}/clientes"}},
+            {"name": "Obtener cliente", "request": {"method": "GET", "url": "{{pedidos_base}}/clientes/{{cliente_id}}"}},
+            {
+              "name": "Crear cliente",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"Cliente Demo\",\n  \"email\": \"cliente@example.com\",\n  \"password\": \"secreto123\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/clientes"
+              }
+            },
+            {
+              "name": "Actualizar cliente",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"Cliente Actualizado\",\n  \"email\": \"cliente.actualizado@example.com\",\n  \"password\": \"nuevaPass1\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/clientes/{{cliente_id}}"
+              }
+            },
+            {"name": "Eliminar cliente", "request": {"method": "DELETE", "url": "{{pedidos_base}}/clientes/{{cliente_id}}"}}
+          ]
+        },
+        {
+          "name": "Depositos",
+          "item": [
+            {"name": "Listar depositos", "request": {"method": "GET", "url": "{{pedidos_base}}/depositos"}},
+            {"name": "Obtener deposito", "request": {"method": "GET", "url": "{{pedidos_base}}/depositos/{{deposito_id}}"}},
+            {"name": "Obtener deposito DTO", "request": {"method": "GET", "url": "{{pedidos_base}}/depositos/{{deposito_id}}/dto"}},
+            {
+              "name": "Crear deposito",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Av. Siempre Viva 123\",\n  \"latitud\": -31.41,\n  \"longitud\": -64.18\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/depositos"
+              }
+            },
+            {
+              "name": "Actualizar deposito",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Ruta 20 Km 5\",\n  \"latitud\": -31.50,\n  \"longitud\": -64.20\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/depositos/{{deposito_id}}"
+              }
+            },
+            {"name": "Eliminar deposito", "request": {"method": "DELETE", "url": "{{pedidos_base}}/depositos/{{deposito_id}}"}}
+          ]
+        },
+        {
+          "name": "Estados",
+          "item": [
+            {"name": "Listar estados", "request": {"method": "GET", "url": "{{pedidos_base}}/estados"}},
+            {"name": "Obtener estado", "request": {"method": "GET", "url": "{{pedidos_base}}/estados/{{estado_id}}"}},
+            {
+              "name": "Crear estado",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"En Deposito\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/estados"
+              }
+            },
+            {
+              "name": "Actualizar estado",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"En Ruta\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/estados/{{estado_id}}"
+              }
+            },
+            {"name": "Eliminar estado", "request": {"method": "DELETE", "url": "{{pedidos_base}}/estados/{{estado_id}}"}}
+          ]
+        },
+        {
+          "name": "Contenedores",
+          "item": [
+            {"name": "Listar contenedores", "request": {"method": "GET", "url": "{{pedidos_base}}/contenedores"}},
+            {"name": "Obtener contenedor", "request": {"method": "GET", "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}"}},
+            {
+              "name": "Crear contenedor",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"peso\": 1200,\n  \"volumen\": 25,\n  \"clienteId\": {{cliente_id}},\n  \"estadoId\": {{estado_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/contenedores"
+              }
+            },
+            {
+              "name": "Actualizar contenedor",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"id\": {{contenedor_id}},\n  \"peso\": 1100,\n  \"volumen\": 23,\n  \"cliente\": {\n    \"id\": {{cliente_id}},\n    \"nombre\": \"Cliente Demo\",\n    \"email\": \"cliente@example.com\"\n  }\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}"
+              }
+            },
+            {"name": "Eliminar contenedor", "request": {"method": "DELETE", "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}"}},
+            {"name": "Contenedores pendientes", "request": {"method": "GET", "url": "{{pedidos_base}}/contenedores/pendientes"}},
+            {
+              "name": "Actualizar estado del contenedor",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"id\": {{estado_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}/estado"
+              }
+            },
+            {"name": "Historial de estados", "request": {"method": "GET", "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}/seguimiento"}}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Logistica",
+      "description": "Endpoints bajo {{logistica_base}}",
+      "item": [
+        {
+          "name": "Solicitudes",
+          "item": [
+            {"name": "Listar solicitudes", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes"}},
+            {"name": "Obtener solicitud", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}"}},
+            {"name": "Pendientes de procesar", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/pendientes-de-procesar"}},
+            {"name": "Resumen para cliente", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}/resumen-cliente"}},
+            {
+              "name": "Crear solicitud (peticion traslado)",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/solicitudes"
+              }
+            },
+            {
+              "name": "Procesar solicitud",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-01-10\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud"
+              }
+            },
+            {
+              "name": "Actualizar solicitud",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"id\": {{solicitud_id}},\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}},\n  \"depositoId\": {{deposito_id}},\n  \"camionId\": {{camion_id}},\n  \"costoEstimado\": 150000,\n  \"tiempoEstimadoHoras\": 72,\n  \"fechaEstimadaDespacho\": \"2025-01-05\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}"
+              }
+            },
+            {"name": "Eliminar solicitud", "request": {"method": "DELETE", "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}"}},
+            {"name": "Informe de desempeño", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/informe-desempeno"}},
+            {"name": "Contenedor tiene deposito", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/contenedor/{{contenedor_id}}/tiene-deposito"}}
+          ]
+        },
+        {
+          "name": "Tramos de ruta",
+          "item": [
+            {"name": "Listar tramos", "request": {"method": "GET", "url": "{{logistica_base}}/tramos-ruta"}},
+            {"name": "Obtener tramo", "request": {"method": "GET", "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}"}},
+            {
+              "name": "Crear tramo",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{deposito_id}},\n  \"destinoTipo\": \"DEPOSITO\",\n  \"fechaEstimadaSalida\": \"2025-01-05\",\n  \"fechaEstimadaLlegada\": \"2025-01-07\",\n  \"distancia\": 750,\n  \"tiempoEstimado\": 48\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/tramos-ruta"
+              }
+            },
+            {
+              "name": "Actualizar tramo",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"id\": {{tramo_id}},\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{ciudad_id}},\n  \"destinoTipo\": \"CIUDAD\",\n  \"distancia\": 550,\n  \"tiempoEstimado\": 36\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}"
+              }
+            },
+            {"name": "Eliminar tramo", "request": {"method": "DELETE", "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}"}},
+            {
+              "name": "Observer cambio de estado",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"estadoId\": {{estado_id}},\n  \"fechaCambio\": \"2025-01-05\"\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/tramos-ruta/observer/estado"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tarifas",
+          "item": [
+            {"name": "Listar tarifas", "request": {"method": "GET", "url": "{{logistica_base}}/tarifas"}},
+            {"name": "Obtener tarifa", "request": {"method": "GET", "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"}},
+            {
+              "name": "Crear tarifa",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"montoBase\": 1200,\n  \"costoPorKm\": 45\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/tarifas"
+              }
+            },
+            {
+              "name": "Actualizar tarifa",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"montoBase\": 1500,\n  \"costoPorKm\": 50\n}", "options": {"raw": {"language": "json"}}},
+                "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"
+              }
+            },
+            {"name": "Eliminar tarifa", "request": {"method": "DELETE", "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"}}
+          ]
+        },
+        {
+          "name": "Geo",
+          "item": [
+            {"name": "Distancia entre ciudades", "request": {"method": "GET", "url": "{{logistica_base}}/distancia/ciudades?origenId={{ciudad_id}}&destinoId={{ciudad_id}}"}},
+            {"name": "Distancia entre depositos", "request": {"method": "GET", "url": "{{logistica_base}}/distancia/depositos?origenId={{deposito_id}}&destinoId={{deposito_id}}"}},
+            {"name": "Ciudad a deposito", "request": {"method": "GET", "url": "{{logistica_base}}/distancia/ciudad-deposito?ciudadId={{ciudad_id}}&depositoId={{deposito_id}}"}},
+            {"name": "Deposito a ciudad", "request": {"method": "GET", "url": "{{logistica_base}}/distancia/deposito-ciudad?depositoId={{deposito_id}}&ciudadId={{ciudad_id}}"}},
+            {"name": "Distancia flexible", "request": {"method": "GET", "url": "{{logistica_base}}/distancia/flexible?origenId={{ciudad_id}}&origenTipo=CIUDAD&destinoId={{deposito_id}}&destinoTipo=DEPOSITO"}}
+          ]
+        },
+        {
+          "name": "Proxy Ciudades",
+          "item": [
+            {"name": "Obtener ciudad via logistica", "request": {"method": "GET", "url": "{{logistica_base}}/ciudades/{{ciudad_id}}"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
