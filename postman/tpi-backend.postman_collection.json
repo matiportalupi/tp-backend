@@ -22,7 +22,7 @@
     {"key": "keycloak_base", "value": "http://localhost:8083"},
     {"key": "realm", "value": "TPIBackend"},
     {"key": "client_id", "value": "backend"},
-    {"key": "username", "value": "admin01"},
+    {"key": "username", "value": "admin"},
     {"key": "password", "value": "admin123"},
     {"key": "access_token", "value": ""},
     {"key": "ciudad_id", "value": "1"},
