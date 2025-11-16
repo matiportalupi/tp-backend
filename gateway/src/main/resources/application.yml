@@ -30,4 +30,4 @@ server:
   port: 8082
 
 seguridad:
-  desactivada: true
+  desactivada: False

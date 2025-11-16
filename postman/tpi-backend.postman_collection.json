@@ -20,7 +20,7 @@
     {"key": "pedidos_base", "value": "{{gateway_base}}/api/pedidos"},
     {"key": "logistica_base", "value": "{{gateway_base}}/api/logistica"},
     {"key": "keycloak_base", "value": "http://localhost:8083"},
-    {"key": "realm", "value": "tpi-backend"},
+    {"key": "realm", "value": "TPIBackend"},
     {"key": "client_id", "value": "backend"},
     {"key": "username", "value": "admin01"},
     {"key": "password", "value": "admin123"},
