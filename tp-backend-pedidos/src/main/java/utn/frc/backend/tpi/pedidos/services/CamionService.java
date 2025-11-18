@@ -2,6 +2,8 @@ package utn.frc.backend.tpi.pedidos.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,32 +15,39 @@ import utn.frc.backend.tpi.pedidos.repositories.CamionRepository;
 @Service
 public class CamionService {
     
+    private static final Logger log = LoggerFactory.getLogger(CamionService.class);
+
     @Autowired
     private CamionRepository camionRepo;
 
     public List<Camion> obtenerTodos(){
+        log.debug("Listando todos los camiones registrados");
         return camionRepo.findAll();
     }
 
     public Camion obtenerPorId(Long id){
         return camionRepo.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Camión no encontrado"));
-        //RuntimeException("Camión no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Camión no encontrado"));
     }
 
     public Camion crear(Camion camion){
         validarCamion(camion);
-        return camionRepo.save(camion);
+        Camion guardado = camionRepo.save(camion);
+        log.info("Camión {} registrado", guardado.getId());
+        return guardado;
     }
 
     public Camion actualizar(Long id, Camion camion){
         validarCamion(camion);
         camion.setId(id);
-        return camionRepo.save(camion);
+        Camion actualizado = camionRepo.save(camion);
+        log.info("Camión {} actualizado", id);
+        return actualizado;
     }
 
     public void eliminar(Long id){
         camionRepo.deleteById(id);
+        log.info("Camión {} eliminado", id);
     }
 
     //VALIDACIONES DE CAMION

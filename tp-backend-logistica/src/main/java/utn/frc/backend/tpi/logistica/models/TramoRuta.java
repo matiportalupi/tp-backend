@@ -62,4 +62,19 @@ public class TramoRuta {
     @Column(name = "fecha_estimada_llegada")
     private LocalDate fechaEstimadaLlegada;
 
+    @Column(name = "costo_estimado")
+    private Double costoEstimado;
+
+    @Column(name = "costo_real")
+    private Double costoReal;
+
+    @Column(name = "estado_tramo")
+    private String estadoTramo = "ESTIMADO"; // ESTIMADO, ASIGNADO, INICIADO, FINALIZADO
+
+    @Column(name = "camion_id")
+    private Long camionId;
+
+    @Column(name = "tiempo_real_horas")
+    private Double tiempoRealHoras;
+
 }

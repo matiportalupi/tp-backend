@@ -17,7 +17,7 @@ public class GeoController {
     public ResponseEntity<TramoRutaDto> calcularDistanciaEntreCiudades(
             @RequestParam Long origenId,
             @RequestParam Long destinoId,
-            @RequestHeader("Authorization") String autHeader) {
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
         try {
             TramoRutaDto tramoRuta = geoService.calcularDistanciaEntreCiudades(origenId, destinoId, autHeader);
             return ResponseEntity.ok(tramoRuta);
@@ -30,7 +30,7 @@ public class GeoController {
     public ResponseEntity<TramoRutaDto> calcularDistanciaEntreDepositos(
             @RequestParam Long origenId,
             @RequestParam Long destinoId,
-            @RequestHeader("Authorization") String autHeader) {
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
         try {
             TramoRutaDto tramoRuta = geoService.calcularDistanciaEntreDepositos(origenId, destinoId, autHeader);
             return ResponseEntity.ok(tramoRuta);
@@ -43,7 +43,7 @@ public class GeoController {
     public ResponseEntity<TramoRutaDto> calcularDistanciaCiudadADeposito(
             @RequestParam Long ciudadId,
             @RequestParam Long depositoId,
-            @RequestHeader("Authorization") String autHeader) {
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
         try {
             TramoRutaDto tramoRuta = geoService.calcularDistanciaCiudadADeposito(ciudadId, depositoId, autHeader);
             return ResponseEntity.ok(tramoRuta);
@@ -56,7 +56,7 @@ public class GeoController {
     public ResponseEntity<TramoRutaDto> calcularDistanciaDepositoACiudad(
             @RequestParam Long depositoId,
             @RequestParam Long ciudadId,
-            @RequestHeader("Authorization") String autHeader) {
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
         try {
             TramoRutaDto tramoRuta = geoService.calcularDistanciaDepositoACiudad(depositoId, ciudadId, autHeader);
             return ResponseEntity.ok(tramoRuta);
@@ -72,9 +72,10 @@ public class GeoController {
             @RequestParam String origenTipo,
             @RequestParam Long destinoId,
             @RequestParam String destinoTipo,
-            @RequestHeader("Authorization") String autHeader) {
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
         try {
-            TramoRutaDto tramoRuta = geoService.calcularDistanciaFlexible(origenId, origenTipo, destinoId, destinoTipo, autHeader);
+            TramoRutaDto tramoRuta = geoService.calcularDistanciaFlexible(origenId, origenTipo, destinoId, destinoTipo,
+                    autHeader);
             return ResponseEntity.ok(tramoRuta);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

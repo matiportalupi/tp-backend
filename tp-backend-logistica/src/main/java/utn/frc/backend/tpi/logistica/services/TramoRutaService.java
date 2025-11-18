@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import utn.frc.backend.tpi.logistica.config.RestTemplateFactory;
 import utn.frc.backend.tpi.logistica.dtos.HistorialEstadoDto;
 import utn.frc.backend.tpi.logistica.dtos.TramoRutaDto;
+import utn.frc.backend.tpi.logistica.exceptions.BusinessException;
 import utn.frc.backend.tpi.logistica.models.Solicitud;
 import utn.frc.backend.tpi.logistica.models.TramoRuta;
 import utn.frc.backend.tpi.logistica.repositories.SolicitudRepository;
@@ -18,6 +24,8 @@ import utn.frc.backend.tpi.logistica.repositories.TramoRutaRepository;
 
 @Service
 public class TramoRutaService {
+
+    private static final Logger log = LoggerFactory.getLogger(TramoRutaService.class);
 
     @Autowired
     private TramoRutaRepository tramoRutaRepo;
@@ -58,6 +66,7 @@ public class TramoRutaService {
     public List<TramoRuta> generarTramos(Solicitud solicitud, String autHeader) {
 
         List<TramoRuta> tramos = new ArrayList<>();
+        log.debug("Generando tramos para solicitud {}", solicitud.getId());
 
         try {
             if (solicitud.getDepositoId() != null) {
@@ -124,8 +133,9 @@ public class TramoRutaService {
             return tramos;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al calcular tramos: " + e.getMessage());
+            log.error("Error al calcular tramos para solicitud {}", solicitud.getId(), e);
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al calcular tramos de la solicitud " + solicitud.getId(), e);
         }
     }
 
@@ -140,14 +150,15 @@ public class TramoRutaService {
         Long estadoId = dto.getEstadoId();
         LocalDate fecha = dto.getFechaCambio();
 
-
         Optional<Solicitud> solicitudOp = solicitudRepository.findByContenedorId(contenedorId);
-        if (solicitudOp.isEmpty())
+        if (solicitudOp.isEmpty()) {
+            log.warn("No se halló solicitud asociada al contenedor {} para actualizar estado {}", contenedorId,
+                    estadoId);
             return;
+        }
 
         Solicitud solicitud = solicitudOp.get();
         List<TramoRuta> tramos = solicitud.getTramos();
-
 
         // Estado: Retirado de origen
 
@@ -155,10 +166,11 @@ public class TramoRutaService {
             long diasEstimados = Math.round(tramos.get(0).getTiempoEstimado() / 24.0);
             tramos.get(0).setFechaRealSalida(fecha);
             tramos.get(0).setFechaEstimadaLlegada(fecha.plusDays(diasEstimados));
-            if(tramos.size() >= 2){
-                 long diasEstimados1 = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
+            if (tramos.size() >= 2) {
+                long diasEstimados1 = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
                 tramos.get(1).setFechaEstimadaSalida(tramos.get(0).getFechaEstimadaLlegada().plusDays(1));
-                tramos.get(1).setFechaEstimadaLlegada(tramos.get(1).getFechaEstimadaSalida().plusDays(diasEstimados1));}
+                tramos.get(1).setFechaEstimadaLlegada(tramos.get(1).getFechaEstimadaSalida().plusDays(diasEstimados1));
+            }
 
         }
 
@@ -168,7 +180,7 @@ public class TramoRutaService {
             tramos.get(0).setFechaRealLlegada(fecha);
             tramos.get(1).setFechaEstimadaSalida(fecha.plusDays(1));
             tramos.get(1).setFechaEstimadaLlegada(tramos.get(1).getFechaEstimadaSalida().plusDays(diasEstimados));
-    
+
         }
 
         // Retirado de deposito
@@ -177,7 +189,7 @@ public class TramoRutaService {
             long diasEstimados = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
             tramos.get(1).setFechaRealSalida(fecha);
             tramos.get(1).setFechaEstimadaLlegada(fecha.plusDays(diasEstimados));
-    
+
         }
 
         // EntragadoEnDestino
@@ -188,24 +200,114 @@ public class TramoRutaService {
 
             // Calcular el costo real usando fechas reales
             try {
-                // TODO: Se necesita una forma de obtener un token válido aquí.
-                // double costoReal = tarifaService.calcularTarifaSolicitud(solicitud, "Bearer fake-token");
-                // solicitud.setCostoEstimado(costoReal);
                 double costoReal = solicitud.getCostoEstimado();
                 solicitud.setCostoEstimado(costoReal);
             } catch (Exception e) {
-                System.err.println("Error al calcular el costo real: " + e.getMessage());
+                log.error("Error al calcular el costo real para la solicitud {}", solicitud.getId(), e);
             }
-            
-
-
-
-
 
         }
         solicitudRepository.save(solicitud);
         tramoRutaRepo.saveAll(tramos);
 
+    }
+
+    // === MÉTODOS PARA TRANSPORTISTA ===
+
+    public TramoRuta iniciarTramo(Long tramoId, String autHeader) {
+        TramoRuta tramo = tramoRutaRepo.findById(tramoId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Tramo no encontrado"));
+
+        if (!"ASIGNADO".equals(tramo.getEstadoTramo())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "El tramo debe estar en estado ASIGNADO para iniciarse");
+        }
+
+        tramo.setEstadoTramo("INICIADO");
+        tramo.setFechaRealSalida(LocalDate.now());
+        log.info("Tramo {} iniciado por transportista", tramoId);
+        return tramoRutaRepo.save(tramo);
+    }
+
+    public TramoRuta finalizarTramo(Long tramoId, String autHeader) {
+        TramoRuta tramo = tramoRutaRepo.findById(tramoId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Tramo no encontrado"));
+
+        if (!"INICIADO".equals(tramo.getEstadoTramo())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "El tramo debe estar en estado INICIADO para finalizarse");
+        }
+
+        tramo.setEstadoTramo("FINALIZADO");
+        tramo.setFechaRealLlegada(LocalDate.now());
+
+        // Calcular tiempo real en horas
+        long diasReales = ChronoUnit.DAYS.between(tramo.getFechaRealSalida(), tramo.getFechaRealLlegada());
+        tramo.setTiempoRealHoras((double) (diasReales * 24));
+
+        log.info("Tramo {} finalizado por transportista", tramoId);
+        return tramoRutaRepo.save(tramo);
+    }
+
+    public TramoRuta asignarCamion(Long tramoId, Long camionId, String autHeader) {
+        TramoRuta tramo = tramoRutaRepo.findById(tramoId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Tramo no encontrado"));
+
+        String token = autHeader.replace("Bearer ", "");
+        org.springframework.web.client.RestTemplate restTemplate = RestTemplateFactory.conToken(token);
+
+        // Obtener datos del camión
+        String camionUrl = baseUrl + "/camiones/" + camionId;
+        try {
+            com.fasterxml.jackson.databind.JsonNode camionNode = restTemplate.getForObject(camionUrl,
+                    com.fasterxml.jackson.databind.JsonNode.class);
+
+            if (camionNode == null) {
+                throw new BusinessException(HttpStatus.NOT_FOUND, "Camión no encontrado");
+            }
+
+            // Obtener datos del contenedor
+            Solicitud solicitud = tramo.getSolicitud();
+            String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
+            com.fasterxml.jackson.databind.JsonNode contenedorNode = restTemplate.getForObject(contenedorUrl,
+                    com.fasterxml.jackson.databind.JsonNode.class);
+
+            if (contenedorNode == null) {
+                throw new BusinessException(HttpStatus.NOT_FOUND, "Contenedor no encontrado");
+            }
+
+            // Validar capacidad
+            double pesoCamion = camionNode.path("capacidadPeso").asDouble(0);
+            double volumenCamion = camionNode.path("volumen").asDouble(0);
+            double pesoContenedor = contenedorNode.path("peso").asDouble(0);
+            double volumenContenedor = contenedorNode.path("volumen").asDouble(0);
+
+            if (pesoContenedor > pesoCamion) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "El peso del contenedor (" + pesoContenedor + "kg) excede la capacidad del camión ("
+                                + pesoCamion + "kg)");
+            }
+
+            if (volumenContenedor > volumenCamion) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "El volumen del contenedor (" + volumenContenedor + "m³) excede la capacidad del camión ("
+                                + volumenCamion + "m³)");
+            }
+
+            tramo.setCamionId(camionId);
+            tramo.setEstadoTramo("ASIGNADO");
+            log.info("Camión {} asignado al tramo {}", camionId, tramoId);
+            return tramoRutaRepo.save(tramo);
+
+        } catch (Exception e) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Error al asignar camión: " + e.getMessage());
+        }
+    }
+
+    public List<TramoRuta> obtenerTramosAsignadosPorTransportista(String autHeader) {
+        return tramoRutaRepo.findAll().stream()
+                .filter(t -> "ASIGNADO".equals(t.getEstadoTramo()) || "INICIADO".equals(t.getEstadoTramo()))
+                .toList();
     }
 
 }

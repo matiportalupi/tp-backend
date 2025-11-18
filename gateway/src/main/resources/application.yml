@@ -31,3 +31,16 @@ server:
 
 seguridad:
   desactivada: False
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    utn.frc.backend.tpi.gateway: DEBUG

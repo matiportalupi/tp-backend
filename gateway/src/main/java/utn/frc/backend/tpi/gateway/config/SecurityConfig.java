@@ -16,8 +16,7 @@ import org.springframework.http.HttpMethod;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.core.convert.converter.Converter; 
-
+import org.springframework.core.convert.converter.Converter;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -30,51 +29,88 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         if (seguridadDesactivada) {
             return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(ex -> ex.anyExchange().permitAll())
-                .build();
+                    .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                    .authorizeExchange(ex -> ex.anyExchange().permitAll())
+                    .build();
         }
 
         http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchange -> exchange
-                .pathMatchers("/api/logistica/tramos-ruta/observer/estado").permitAll()
-                .pathMatchers("/api/logistica/solicitudes/{id}/resumen-cliente").hasAnyRole("cliente", "admin")
-                .pathMatchers(HttpMethod.POST, "/api/logistica/solicitudes").hasAnyRole("cliente", "admin")
-                .pathMatchers("/api/logistica/solicitudes/*").hasAnyRole("cliente", "admin")
-                .pathMatchers("/api/logistica/**").hasRole("admin")
-                .pathMatchers("/api/pedidos/contenedores/*/seguimiento").hasAnyRole("cliente", "admin")
-                .pathMatchers("/api/pedidos/contenedores/*").hasAnyRole("cliente", "admin")
-                .pathMatchers("/api/pedidos/**").hasRole("admin")
-                .anyExchange().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            );
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchange -> exchange
+                        // === LOGISTICA - ESPECÍFICO (antes que lo genérico) ===
+                        .pathMatchers("/api/logistica/tramos-ruta/observer/estado").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/logistica/tramos-ruta/mi-asignacion")
+                        .hasRole("transportista")
+                        .pathMatchers(HttpMethod.POST, "/api/logistica/tramos-ruta/*/iniciar").hasRole("transportista")
+                        .pathMatchers(HttpMethod.POST, "/api/logistica/tramos-ruta/*/finalizar")
+                        .hasRole("transportista")
+                        .pathMatchers(HttpMethod.POST, "/api/logistica/tramos-ruta/*/asignar-camion/**")
+                        .hasRole("admin")
+                        .pathMatchers("/api/logistica/solicitudes/{id}/resumen-cliente").hasAnyRole("cliente", "admin")
+                        .pathMatchers(HttpMethod.POST, "/api/logistica/solicitudes").hasAnyRole("cliente", "admin")
+                        .pathMatchers(HttpMethod.GET, "/api/logistica/solicitudes/pendientes").hasRole("admin")
+                        .pathMatchers(HttpMethod.PUT, "/api/logistica/solicitudes/*/finalizar").hasRole("admin")
+                        .pathMatchers("/api/logistica/solicitudes/*").hasAnyRole("cliente", "admin")
+                        // === LOGISTICA - GENÉRICO (al final) ===
+                        .pathMatchers("/api/logistica/**").hasRole("admin")
+                        // === PEDIDOS ===
+                        .pathMatchers("/api/pedidos/contenedores/*/seguimiento").hasAnyRole("cliente", "admin")
+                        .pathMatchers("/api/pedidos/contenedores/*").hasAnyRole("cliente", "admin")
+                        .pathMatchers("/api/pedidos/**").hasRole("admin")
+                        .anyExchange().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
-
 
     private Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter() {
         ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             List<String> roles = extractRealmRoles(jwt);
             List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(role -> "ROLE_" + role)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                    .map(role -> "ROLE_" + role)
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
             return Flux.fromIterable(authorities);
         });
         return converter;
     }
 
     private List<String> extractRealmRoles(Jwt jwt) {
-        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-        if (realmAccess == null || !realmAccess.containsKey("roles")) {
-            return Collections.emptyList();
+        List<String> roles = new ArrayList<>();
+
+        // 1) Realm roles (standard Keycloak claim)
+        Object realmAccessObj = jwt.getClaim("realm_access");
+        if (realmAccessObj instanceof Map) {
+            Map<?, ?> realmAccess = (Map<?, ?>) realmAccessObj;
+            Object rroles = realmAccess.get("roles");
+            if (rroles instanceof Iterable) {
+                for (Object o : (Iterable<?>) rroles) {
+                    roles.add(String.valueOf(o));
+                }
+            }
         }
-        return (List<String>) realmAccess.get("roles");
+
+        // 2) Client (resource) roles: resource_access -> { clientId: { roles: [...] } }
+        Object resourceAccessObj = jwt.getClaim("resource_access");
+        if (resourceAccessObj instanceof Map) {
+            Map<?, ?> resourceAccess = (Map<?, ?>) resourceAccessObj;
+            for (Map.Entry<?, ?> entry : resourceAccess.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Map) {
+                    Map<?, ?> clientMap = (Map<?, ?>) value;
+                    Object croles = clientMap.get("roles");
+                    if (croles instanceof Iterable) {
+                        for (Object o : (Iterable<?>) croles) {
+                            roles.add(String.valueOf(o));
+                        }
+                    }
+                }
+            }
+        }
+
+        return roles;
     }
-    
+
 }

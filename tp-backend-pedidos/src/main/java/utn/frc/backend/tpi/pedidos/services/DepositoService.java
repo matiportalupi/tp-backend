@@ -2,6 +2,8 @@ package utn.frc.backend.tpi.pedidos.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import utn.frc.backend.tpi.pedidos.repositories.DepositoRepository;
 
 @Service
 public class DepositoService {
+
+    private static final Logger log = LoggerFactory.getLogger(DepositoService.class);
     
     @Autowired
     private DepositoRepository depositoRepo;
@@ -22,6 +26,7 @@ public class DepositoService {
     private CiudadRepository ciudadRepo;
 
     public List<Deposito> obtenerTodos(){
+        log.debug("Listando depósitos");
         return depositoRepo.findAll();
     }
 
@@ -32,7 +37,9 @@ public class DepositoService {
 
     public Deposito crear(Deposito deposito) {
         guardarConCiudadYValidaciones(deposito);
-        return depositoRepo.save(deposito);
+        Deposito guardado = depositoRepo.save(deposito);
+        log.info("Depósito {} creado", guardado.getId());
+        return guardado;
 
     }
 
@@ -41,12 +48,15 @@ public class DepositoService {
 
         deposito.setId(id);
         guardarConCiudadYValidaciones(deposito);
-        return depositoRepo.save(deposito);
+        Deposito actualizado = depositoRepo.save(deposito);
+        log.info("Depósito {} actualizado", id);
+        return actualizado;
     }
 
 
     public void eliminar(Long id){
         depositoRepo.deleteById(id);
+        log.info("Depósito {} eliminado", id);
     }
 
     // Método interno que incluye validaciones y asignación de ciudad

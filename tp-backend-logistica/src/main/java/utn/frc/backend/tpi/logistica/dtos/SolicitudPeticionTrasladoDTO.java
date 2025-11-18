@@ -12,4 +12,5 @@ public class SolicitudPeticionTrasladoDTO {
     private Long contenedorId;
     private Long ciudadOrigenId;
     private Long ciudadDestinoId;
+    private ClienteNuevoDTO nuevoCliente;
 }

@@ -1,0 +1,92 @@
+2025-11-16 21:58:20.831 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-11-16 21:58:20.858 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Starting GatewayApplication using Java 21.0.8 with PID 38849 (/Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway/target/classes started by bisiojuan in /Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway)
+2025-11-16 21:58:20.858 DEBUG [main] u.f.b.tpi.gateway.GatewayApplication - Running with Spring Boot v3.1.4, Spring v6.0.12
+2025-11-16 21:58:20.859 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-16 21:58:21.314 INFO  [main] o.s.cloud.context.scope.GenericScope - BeanFactory id=d23dbb4f-54ee-3ef3-89d5-44a108f2630f
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-16 21:58:21.750 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-16 21:58:21.829 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-11-16 21:58:21.979 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
+2025-11-16 21:58:22.010 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 1.468 seconds (process running for 1.629)
+2025-11-16 22:00:28.297 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2025-11-16 23:06:36.917 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-11-16 23:06:36.982 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Starting GatewayApplication using Java 21.0.8 with PID 44798 (/Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway/target/classes started by bisiojuan in /Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway)
+2025-11-16 23:06:36.983 DEBUG [main] u.f.b.tpi.gateway.GatewayApplication - Running with Spring Boot v3.1.4, Spring v6.0.12
+2025-11-16 23:06:36.984 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-16 23:06:38.325 INFO  [main] o.s.cloud.context.scope.GenericScope - BeanFactory id=d23dbb4f-54ee-3ef3-89d5-44a108f2630f
+2025-11-16 23:06:39.657 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-16 23:06:39.659 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-16 23:06:39.661 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-16 23:06:39.661 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-16 23:06:39.661 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-16 23:06:39.662 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-16 23:06:40.142 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-11-16 23:06:40.748 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
+2025-11-16 23:06:40.848 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 4.526 seconds (process running for 5.03)
+2025-11-16 23:09:59.525 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2025-11-16 23:31:29.691 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-11-16 23:31:29.743 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Starting GatewayApplication using Java 21.0.8 with PID 46777 (/Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway/target/classes started by bisiojuan in /Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway)
+2025-11-16 23:31:29.743 DEBUG [main] u.f.b.tpi.gateway.GatewayApplication - Running with Spring Boot v3.1.4, Spring v6.0.12
+2025-11-16 23:31:29.744 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-16 23:31:31.124 INFO  [main] o.s.cloud.context.scope.GenericScope - BeanFactory id=d23dbb4f-54ee-3ef3-89d5-44a108f2630f
+2025-11-16 23:31:32.106 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-16 23:31:32.107 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-16 23:31:32.308 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-11-16 23:31:32.676 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
+2025-11-16 23:31:32.758 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 3.636 seconds (process running for 4.09)
+2025-11-16 23:32:31.140 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2025-11-16 23:42:27.597 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-11-16 23:42:27.659 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Starting GatewayApplication using Java 21.0.8 with PID 47988 (/Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway/target/classes started by bisiojuan in /Users/bisiojuan/Desktop/TrabajoPracticoBackend/TPforReal/tp-backend/gateway)
+2025-11-16 23:42:27.659 DEBUG [main] u.f.b.tpi.gateway.GatewayApplication - Running with Spring Boot v3.1.4, Spring v6.0.12
+2025-11-16 23:42:27.660 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-16 23:42:28.882 INFO  [main] o.s.cloud.context.scope.GenericScope - BeanFactory id=d23dbb4f-54ee-3ef3-89d5-44a108f2630f
+2025-11-16 23:42:29.945 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-16 23:42:29.946 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-16 23:42:30.189 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-11-16 23:42:30.545 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
+2025-11-16 23:42:30.606 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 3.636 seconds (process running for 4.192)
+2025-11-16 23:43:06.348 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library

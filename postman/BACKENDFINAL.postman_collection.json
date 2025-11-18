@@ -306,7 +306,19 @@
             },
             {"name": "Eliminar solicitud", "request": {"method": "DELETE", "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}"}},
             {"name": "Informe de desempeño", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/informe-desempeno"}},
-            {"name": "Contenedor tiene deposito", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/contenedor/{{contenedor_id}}/tiene-deposito"}}
+            {"name": "Contenedor tiene deposito", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/contenedor/{{contenedor_id}}/tiene-deposito"}},
+            {
+              "name": "OBTENER SOLICITUDES PENDIENTES (con filtros de estado/ubicación)",
+              "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/pendientes?estado=PROGRAMADA&ubicacion="}
+            },
+            {
+              "name": "CALCULAR COSTO REAL y Finalizar solicitud",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}/finalizar"
+              }
+            }
           ]
         },
         {
@@ -341,6 +353,34 @@
                 "body": {"mode": "raw", "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"estadoId\": {{estado_id}},\n  \"fechaCambio\": \"2025-01-05\"\n}", "options": {"raw": {"language": "json"}}},
                 "url": "{{logistica_base}}/tramos-ruta/observer/estado"
               }
+            },
+            {
+              "name": "TRANSPORTISTA: Ver mis tramos asignados",
+              "request": {"method": "GET", "url": "{{logistica_base}}/tramos-ruta/mi-asignacion"}
+            },
+            {
+              "name": "TRANSPORTISTA: Iniciar tramo",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/iniciar"
+              }
+            },
+            {
+              "name": "TRANSPORTISTA: Finalizar tramo",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/finalizar"
+              }
+            },
+            {
+              "name": "ASIGNAR CAMION a tramo (validación peso/volumen)",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}"
+              }
             }
           ]
         },
@@ -350,11 +390,11 @@
             {"name": "Listar tarifas", "request": {"method": "GET", "url": "{{logistica_base}}/tarifas"}},
             {"name": "Obtener tarifa", "request": {"method": "GET", "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"}},
             {
-              "name": "Crear tarifa",
+              "name": "Crear tarifa (nueva estructura: rango peso/volumen)",
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"montoBase\": 1200,\n  \"costoPorKm\": 45\n}", "options": {"raw": {"language": "json"}}},
+                "body": {"mode": "raw", "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1200,\n  \"costoPorKm\": 45,\n  \"costoCombustibleLitro\": 180,\n  \"costoEstadiaDepositoDia\": 500\n}", "options": {"raw": {"language": "json"}}},
                 "url": "{{logistica_base}}/tarifas"
               }
             },
@@ -363,7 +403,7 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"montoBase\": 1500,\n  \"costoPorKm\": 50\n}", "options": {"raw": {"language": "json"}}},
+                "body": {"mode": "raw", "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1500,\n  \"costoPorKm\": 50,\n  \"costoCombustibleLitro\": 200,\n  \"costoEstadiaDepositoDia\": 600\n}", "options": {"raw": {"language": "json"}}},
                 "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"
               }
             },

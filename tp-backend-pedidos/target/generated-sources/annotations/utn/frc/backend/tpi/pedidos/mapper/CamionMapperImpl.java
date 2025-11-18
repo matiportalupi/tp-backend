@@ -7,8 +7,8 @@ import utn.frc.backend.tpi.pedidos.models.Camion;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-16T01:40:30-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-17T22:05:00-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class CamionMapperImpl implements CamionMapper {
@@ -21,10 +21,13 @@ public class CamionMapperImpl implements CamionMapper {
 
         CamionDTO camionDTO = new CamionDTO();
 
+        camionDTO.setId( camion.getId() );
         camionDTO.setCapacidadPeso( camion.getCapacidadPeso() );
         camionDTO.setDisponibilidad( camion.isDisponibilidad() );
-        camionDTO.setId( camion.getId() );
         camionDTO.setVolumen( camion.getVolumen() );
+        camionDTO.setPatente( camion.getPatente() );
+        camionDTO.setModelo( camion.getModelo() );
+        camionDTO.setCapacidadContenedores( camion.getCapacidadContenedores() );
 
         return camionDTO;
     }
@@ -37,10 +40,13 @@ public class CamionMapperImpl implements CamionMapper {
 
         Camion camion = new Camion();
 
-        camion.setCapacidadPeso( dto.getCapacidadPeso() );
-        camion.setDisponibilidad( dto.isDisponibilidad() );
         camion.setId( dto.getId() );
+        camion.setCapacidadPeso( dto.getCapacidadPeso() );
         camion.setVolumen( dto.getVolumen() );
+        camion.setDisponibilidad( dto.isDisponibilidad() );
+        camion.setPatente( dto.getPatente() );
+        camion.setModelo( dto.getModelo() );
+        camion.setCapacidadContenedores( dto.getCapacidadContenedores() );
 
         return camion;
     }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Camion {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,4 +29,13 @@ public class Camion {
 
     @Column(name = "disponibilidad")
     private boolean disponibilidad;
+
+    @Column(name = "patente")
+    private String patente;
+
+    @Column(name = "modelo")
+    private String modelo;
+
+    @Column(name = "capacidad_contenedores")
+    private Integer capacidadContenedores;
 }

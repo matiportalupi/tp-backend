@@ -2,27 +2,32 @@ package utn.frc.backend.tpi.logistica.services;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import utn.frc.backend.tpi.logistica.config.RestTemplateFactory;
+import utn.frc.backend.tpi.logistica.dtos.CamionDto;
 import utn.frc.backend.tpi.logistica.dtos.ContenedorDto;
 import utn.frc.backend.tpi.logistica.dtos.DepositoDto;
+import utn.frc.backend.tpi.logistica.exceptions.BusinessException;
 import utn.frc.backend.tpi.logistica.models.Solicitud;
 import utn.frc.backend.tpi.logistica.models.Tarifa;
 import utn.frc.backend.tpi.logistica.models.TramoRuta;
 import utn.frc.backend.tpi.logistica.repositories.TarifaRepository;
-import utn.frc.backend.tpi.logistica.config.RestTemplateFactory;
-import utn.frc.backend.tpi.logistica.dtos.CamionDto;
-
-import java.util.Comparator;
 
 @Service
 public class TarifaService {
+
+    private static final Logger log = LoggerFactory.getLogger(TarifaService.class);
     @Autowired
     private RestTemplate restTemplate;
 
@@ -51,9 +56,10 @@ public class TarifaService {
 
             return camion.getCapacidadPeso() + contenedor.getPeso();
         } catch (Exception e) {
-  
-            System.err.println("Error al obtener el peso total: " + e.getMessage());
-            throw new RuntimeException("No se pudo calcular el peso total del envío", e);
+
+            log.error("Error al obtener el peso total para camión {} y contenedor {}", camionId, contenedorId, e);
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo calcular el peso total del envío", e);
         }
     }
 
@@ -87,19 +93,13 @@ public class TarifaService {
         double tarifaTotal = baseFija;
         double costoPorEstadiaPorDia = 1000;
 
-        double pesoTotal;
-        try {
-            pesoTotal = obtenerPesoTotal(solicitud.getCamionId(), solicitud.getContenedorId(), autHeader);
-        } catch (Exception e) {
-            System.err.println("Error al obtener peso total: " + e.getMessage());
-            throw new RuntimeException("Error al calcular tarifa: no se pudo obtener el peso total del envío.", e);
-        }
+        double pesoTotal = obtenerPesoTotal(solicitud.getCamionId(), solicitud.getContenedorId(), autHeader);
 
         double costoPorKm = determinarCostoPorKm(pesoTotal);
 
         List<TramoRuta> tramos = solicitud.getTramos();
         if (tramos == null || tramos.isEmpty()) {
-            throw new IllegalStateException("La solicitud no contiene tramos de ruta.");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "La solicitud no contiene tramos de ruta.");
         }
 
         // Ordenar tramos por orden
@@ -138,9 +138,7 @@ public class TarifaService {
                         if (dias >= 0) {
                             tarifaTotal += dias * costoPorEstadiaPorDia;
                         } else {
-                            System.err.println(
-                                    "Advertencia: la fecha de salida es anterior a la de llegada en el tramo con orden "
-                                            + tramo.getOrden());
+                            log.warn("La fecha de salida es anterior a la de llegada en el tramo {}", tramo.getOrden());
                         }
                     }
                 }
@@ -169,5 +167,117 @@ public class TarifaService {
 
     public void eliminar(Long id) {
         tarifaRepo.deleteById(id);
+    }
+
+    // === MÉTODO PARA CALCULAR COSTO REAL ===
+
+    public Double calcularCostoReal(Solicitud solicitud, List<TramoRuta> tramos, String autHeader) {
+        try {
+            Double costoTotal = 0.0;
+
+            // Cargo por número de tramos (gestión)
+            Double costoGestion = tarifaRepo.findAll().stream()
+                    .map(Tarifa::getCostoBasePorTramo)
+                    .filter(c -> c != null)
+                    .mapToDouble(Double::doubleValue)
+                    .average()
+                    .orElse(1000.0);
+
+            costoTotal += costoGestion * tramos.size();
+
+            // Obtener información del contenedor
+            String token = autHeader.replace("Bearer ", "");
+            RestTemplate restTemplateAutenticado = RestTemplateFactory.conToken(token);
+            com.fasterxml.jackson.databind.JsonNode contenedorNode = restTemplateAutenticado.getForObject(
+                    baseUrl + "/contenedores/" + solicitud.getContenedorId(),
+                    com.fasterxml.jackson.databind.JsonNode.class);
+
+            if (contenedorNode == null) {
+                log.warn("No se encontró contenedor para solicitud {}", solicitud.getId());
+                return costoGestion * tramos.size();
+            }
+
+            Double peso = contenedorNode.path("peso").asDouble(0.0);
+            Double volumen = contenedorNode.path("volumen").asDouble(0.0);
+
+            // Obtener tarifa según rango del contenedor
+            Tarifa tarifa = obtenerTarifaPorRango(peso, volumen);
+
+            if (tarifa == null) {
+                tarifa = tarifaRepo.findAll().stream().findFirst().orElse(null);
+                if (tarifa == null) {
+                    log.warn("No hay tarifas configuradas");
+                    return costoGestion * tramos.size();
+                }
+            }
+
+            // Costo por kilómetros
+            Double distanciaTotal = tramos.stream()
+                    .map(TramoRuta::getDistancia)
+                    .filter(d -> d != null)
+                    .mapToDouble(Double::doubleValue)
+                    .sum();
+
+            if (tarifa.getCostoPorKm() != null) {
+                costoTotal += distanciaTotal * tarifa.getCostoPorKm();
+            }
+
+            // Costo de combustible (consumo promedio 8 litros/100km)
+            Double costoCombustible = 0.0;
+            if (tarifa.getCostoCombustibleLitro() != null) {
+                Double consumoPromedio = 8.0; // litros/100km
+                costoCombustible = (distanciaTotal / 100) * consumoPromedio * tarifa.getCostoCombustibleLitro();
+                costoTotal += costoCombustible;
+            }
+
+            // Costo de estadía en depósitos
+            Double costoEstadia = 0.0;
+            if (tarifa.getCostoEstadiaDepositoDia() != null) {
+                for (TramoRuta tramo : tramos) {
+                    if ("DEPOSITO".equals(tramo.getDestinoTipo())) {
+                        int orden = tramo.getOrden();
+                        TramoRuta siguienteTramo = tramos.stream()
+                                .filter(t -> t.getOrden() == orden + 1)
+                                .findFirst()
+                                .orElse(null);
+
+                        if (siguienteTramo != null && tramo.getFechaRealLlegada() != null
+                                && siguienteTramo.getFechaRealSalida() != null) {
+                            long diasEnDeposito = java.time.temporal.ChronoUnit.DAYS.between(
+                                    tramo.getFechaRealLlegada(),
+                                    siguienteTramo.getFechaRealSalida());
+                            costoEstadia += diasEnDeposito * tarifa.getCostoEstadiaDepositoDia();
+                        }
+                    }
+                }
+                costoTotal += costoEstadia;
+            }
+
+            log.debug("Costo real calculado para solicitud {}: {}", solicitud.getId(), costoTotal);
+            return costoTotal;
+
+        } catch (Exception e) {
+            log.error("Error al calcular costo real para solicitud {}", solicitud.getId(), e);
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al calcular costo real: " + e.getMessage());
+        }
+    }
+
+    private Tarifa obtenerTarifaPorRango(Double peso, Double volumen) {
+        List<Tarifa> tarifas = tarifaRepo.findAll();
+
+        for (Tarifa tarifa : tarifas) {
+            boolean pesoValido = (tarifa.getPesoMinimo() == null || peso >= tarifa.getPesoMinimo()) &&
+                    (tarifa.getPesoMaximo() == null || peso <= tarifa.getPesoMaximo());
+
+            boolean volumenValido = (tarifa.getVolumenMinimo() == null || volumen >= tarifa.getVolumenMinimo()) &&
+                    (tarifa.getVolumenMaximo() == null || volumen <= tarifa.getVolumenMaximo());
+
+            if (pesoValido && volumenValido) {
+                return tarifa;
+            }
+        }
+
+        return null;
     }
 }

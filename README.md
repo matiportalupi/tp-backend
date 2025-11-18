@@ -1,5 +1,5 @@
 
-Este backend gestiona las solicitudes de transporte de contendedores realizada por un cleinte, generando todas las funcionalidades necesarias para calcular la ruta mas eficiente y el seguimiento del contendedor, además de generar reportes sobre el desempeño del servicio.
+Este backend gestiona las solicitudes de transporte de contendedores realizada por un cliente, generando todas las funcionalidades necesarias para calcular la ruta mas eficiente y el seguimiento del contendedor, además de generar reportes sobre el desempeño del servicio.
 
 ## 🧪 Tecnologías utilizadas
 

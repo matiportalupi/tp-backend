@@ -2,6 +2,8 @@ package utn.frc.backend.tpi.pedidos.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,11 +14,14 @@ import utn.frc.backend.tpi.pedidos.repositories.CiudadRepository;
 
 @Service
 public class CiudadService {
+
+    private static final Logger log = LoggerFactory.getLogger(CiudadService.class);
     
     @Autowired
     private CiudadRepository ciudadRepo;
     
     public List<Ciudad> obtenerTodos(){
+        log.debug("Listando ciudades");
         return ciudadRepo.findAll();
     }
 
@@ -26,17 +31,22 @@ public class CiudadService {
 
     public Ciudad crear(Ciudad ciudad){
         validarCiudad(ciudad);
-        return ciudadRepo.save(ciudad);
+        Ciudad guardada = ciudadRepo.save(ciudad);
+        log.info("Ciudad {} creada", guardada.getId());
+        return guardada;
     }
 
     public Ciudad actualizar(Long id, Ciudad ciudad){
         validarCiudad(ciudad);
         ciudad.setId(id);
-        return ciudadRepo.save(ciudad);
+        Ciudad actualizada = ciudadRepo.save(ciudad);
+        log.info("Ciudad {} actualizada", id);
+        return actualizada;
     }
 
     public void eliminar(Long id){
         ciudadRepo.deleteById(id);
+        log.info("Ciudad {} eliminada", id);
     }
 
     //VALIDACIONES DE CIUDAD

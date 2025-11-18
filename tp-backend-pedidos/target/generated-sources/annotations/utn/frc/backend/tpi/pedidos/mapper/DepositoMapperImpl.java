@@ -10,8 +10,8 @@ import utn.frc.backend.tpi.pedidos.models.Deposito;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-16T01:40:30-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-17T22:05:00-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class DepositoMapperImpl implements DepositoMapper {
@@ -25,8 +25,8 @@ public class DepositoMapperImpl implements DepositoMapper {
         DepositoDto depositoDto = new DepositoDto();
 
         depositoDto.setCiudadId( depositoCiudadId( deposito ) );
-        depositoDto.setDireccion( deposito.getDireccion() );
         depositoDto.setId( deposito.getId() );
+        depositoDto.setDireccion( deposito.getDireccion() );
         depositoDto.setLatitud( deposito.getLatitud() );
         depositoDto.setLongitud( deposito.getLongitud() );
 
@@ -41,8 +41,8 @@ public class DepositoMapperImpl implements DepositoMapper {
 
         Deposito deposito = new Deposito();
 
-        deposito.setDireccion( dto.getDireccion() );
         deposito.setId( dto.getId() );
+        deposito.setDireccion( dto.getDireccion() );
         deposito.setLatitud( dto.getLatitud() );
         deposito.setLongitud( dto.getLongitud() );
 

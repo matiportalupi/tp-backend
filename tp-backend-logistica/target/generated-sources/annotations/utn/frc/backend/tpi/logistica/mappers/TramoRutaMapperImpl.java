@@ -9,8 +9,8 @@ import utn.frc.backend.tpi.logistica.models.TramoRuta;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-16T01:40:29-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-18T01:42:18-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class TramoRutaMapperImpl implements TramoRutaMapper {
@@ -25,14 +25,14 @@ public class TramoRutaMapperImpl implements TramoRutaMapper {
 
         tramoRutaDto.setOrigenId( tramoRuta.getUbicacionOrigenId() );
         tramoRutaDto.setDestinoId( tramoRuta.getUbicacionDestinoId() );
-        tramoRutaDto.setDestinoTipo( tramoRuta.getDestinoTipo() );
-        tramoRutaDto.setDistancia( tramoRuta.getDistancia() );
-        tramoRutaDto.setFechaEstimadaLlegada( tramoRuta.getFechaEstimadaLlegada() );
-        tramoRutaDto.setFechaEstimadaSalida( tramoRuta.getFechaEstimadaSalida() );
-        tramoRutaDto.setFechaRealLlegada( tramoRuta.getFechaRealLlegada() );
-        tramoRutaDto.setFechaRealSalida( tramoRuta.getFechaRealSalida() );
         tramoRutaDto.setId( tramoRuta.getId() );
         tramoRutaDto.setOrigenTipo( tramoRuta.getOrigenTipo() );
+        tramoRutaDto.setDestinoTipo( tramoRuta.getDestinoTipo() );
+        tramoRutaDto.setFechaEstimadaSalida( tramoRuta.getFechaEstimadaSalida() );
+        tramoRutaDto.setFechaRealSalida( tramoRuta.getFechaRealSalida() );
+        tramoRutaDto.setFechaEstimadaLlegada( tramoRuta.getFechaEstimadaLlegada() );
+        tramoRutaDto.setFechaRealLlegada( tramoRuta.getFechaRealLlegada() );
+        tramoRutaDto.setDistancia( tramoRuta.getDistancia() );
         tramoRutaDto.setTiempoEstimado( tramoRuta.getTiempoEstimado() );
 
         return tramoRutaDto;
@@ -62,15 +62,15 @@ public class TramoRutaMapperImpl implements TramoRutaMapper {
 
         tramoRuta.setUbicacionOrigenId( dto.getOrigenId() );
         tramoRuta.setUbicacionDestinoId( dto.getDestinoId() );
-        tramoRuta.setDestinoTipo( dto.getDestinoTipo() );
-        tramoRuta.setDistancia( dto.getDistancia() );
-        tramoRuta.setFechaEstimadaLlegada( dto.getFechaEstimadaLlegada() );
-        tramoRuta.setFechaEstimadaSalida( dto.getFechaEstimadaSalida() );
-        tramoRuta.setFechaRealLlegada( dto.getFechaRealLlegada() );
-        tramoRuta.setFechaRealSalida( dto.getFechaRealSalida() );
         tramoRuta.setId( dto.getId() );
         tramoRuta.setOrigenTipo( dto.getOrigenTipo() );
+        tramoRuta.setDestinoTipo( dto.getDestinoTipo() );
+        tramoRuta.setDistancia( dto.getDistancia() );
         tramoRuta.setTiempoEstimado( dto.getTiempoEstimado() );
+        tramoRuta.setFechaRealSalida( dto.getFechaRealSalida() );
+        tramoRuta.setFechaRealLlegada( dto.getFechaRealLlegada() );
+        tramoRuta.setFechaEstimadaSalida( dto.getFechaEstimadaSalida() );
+        tramoRuta.setFechaEstimadaLlegada( dto.getFechaEstimadaLlegada() );
 
         return tramoRuta;
     }

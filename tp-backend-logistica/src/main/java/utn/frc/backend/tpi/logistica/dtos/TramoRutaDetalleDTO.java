@@ -17,11 +17,16 @@ public class TramoRutaDetalleDTO implements Serializable {
     private Long ubicacionDestinoId;
     private String origenTipo;
     private String destinoTipo;
-    private int orden;
+    private Integer orden;
     private Double distancia;
     private Double tiempoEstimado;
     private LocalDate fechaRealSalida;
     private LocalDate fechaRealLlegada;
     private LocalDate fechaEstimadaSalida;
     private LocalDate fechaEstimadaLlegada;
+    private Double costoEstimado;
+    private Double costoReal;
+    private String estadoTramo;
+    private Long camionId;
+    private Double tiempoRealHoras;
 }

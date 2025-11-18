@@ -9,8 +9,8 @@ import utn.frc.backend.tpi.pedidos.models.Estado;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-16T01:40:30-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-17T22:05:00-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class EstadoMapperImpl implements EstadoMapper {

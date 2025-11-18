@@ -3,6 +3,8 @@ package utn.frc.backend.tpi.pedidos.services;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import utn.frc.backend.tpi.pedidos.config.RestTemplateFactory;
 import utn.frc.backend.tpi.pedidos.dto.ContenedorRequestDTO;
 import utn.frc.backend.tpi.pedidos.dto.EstadoSimpleDto;
 import utn.frc.backend.tpi.pedidos.dto.NotificarCambioEstadoDto;
+import utn.frc.backend.tpi.pedidos.exceptions.BusinessException;
 import utn.frc.backend.tpi.pedidos.models.Cliente;
 import utn.frc.backend.tpi.pedidos.models.Contenedor;
 import utn.frc.backend.tpi.pedidos.models.Estado;
@@ -26,6 +29,8 @@ import utn.frc.backend.tpi.pedidos.state.EstadoFactory;
 
 @Service
 public class ContenedorService {
+
+    private static final Logger log = LoggerFactory.getLogger(ContenedorService.class);
 
     @Autowired
     private ContenedorRepository contenedorRepo;
@@ -45,27 +50,28 @@ public class ContenedorService {
     public static final String ESTADO_FINAL = "Entregado en destino";
 
     public List<Contenedor> obtenerTodos() {
+        log.debug("Listando todos los contenedores");
         return contenedorRepo.findAll();
     }
 
     public Contenedor obtenerPorId(Long id) {
         return contenedorRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contenedor no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contenedor no encontrado"));
     }
 
     // Usado por el viejo ContenedorDTO (entity completa)
     public Contenedor crear(Contenedor contenedor) {
-        if (contenedor.getCliente() == null || contenedor.getCliente().getId() == null ||
-            contenedor.getEstado() == null || contenedor.getEstado().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente y estado deben tener un ID válido.");
+        if (contenedor.getEstado() == null || contenedor.getEstado().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado debe tener un ID válido.");
         }
 
+        Long clienteId = contenedor.getCliente() != null ? contenedor.getCliente().getId() : null;
+
         return crearContenedor(
-            contenedor.getPeso(),
-            contenedor.getVolumen(),
-            contenedor.getCliente().getId(),
-            contenedor.getEstado().getId()
-        );
+                contenedor.getPeso(),
+                contenedor.getVolumen(),
+                clienteId,
+                contenedor.getEstado().getId());
     }
 
     // Usado por el nuevo ContenedorRequestDTO (más simple)
@@ -79,11 +85,14 @@ public class ContenedorService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Peso y volumen deben ser mayores a 0.");
         }
 
-        Cliente cliente = clienteRepo.findById(clienteId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente no encontrado"));
+        Cliente cliente = null;
+        if (clienteId != null) {
+            cliente = clienteRepo.findById(clienteId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente no encontrado"));
+        }
 
-        Estado estado = estadoRepo.findById(5L).
-        orElseThrow(() -> new RuntimeException());
+        Estado estado = estadoRepo.findById(5L)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Estado inicial no configurado"));
 
         Contenedor contenedor = new Contenedor();
         contenedor.setPeso(peso);
@@ -92,6 +101,8 @@ public class ContenedorService {
         contenedor.setEstado(estado);
 
         Contenedor guardado = contenedorRepo.save(contenedor);
+        log.info("Contenedor {} creado para el cliente {}", guardado.getId(),
+                clienteId != null ? clienteId : "sin asignar");
 
         // Guardar en historial
         HistorialEstado historial = new HistorialEstado();
@@ -111,36 +122,38 @@ public class ContenedorService {
 
     public void eliminar(Long id) {
         contenedorRepo.deleteById(id);
+        log.info("Contenedor {} eliminado", id);
     }
 
-    //METODO PARA LISTAR LOS ESTADOS QUE ESTAN EN PENDIENTE DE ENTREGA
+    // METODO PARA LISTAR LOS ESTADOS QUE ESTAN EN PENDIENTE DE ENTREGA
     public List<Contenedor> obtenerPendientesEntrega() {
         return contenedorRepo.findByEstadoNombreNot(ESTADO_FINAL);
     }
 
     // METODO PARA VALIDAR SI EL CONTENEDOR TIENE DEPOSITO
-    
+
     private boolean contenedorTieneDeposito(Long contenedorId, String autHeader) {
-    try {
-        String token = autHeader.replace("Bearer ", "");
-        RestTemplate restTemplate = RestTemplateFactory.conToken(token);
-        return restTemplate.getForObject(
-            "http://localhost:8082/api/logistica/solicitudes/contenedor/" + contenedorId + "/tiene-deposito",
-            Boolean.class
-        );
-    } catch (Exception e) {
-        throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo consultar si el contenedor tiene depósito.");
-    }
+        try {
+            String token = autHeader.replace("Bearer ", "");
+            RestTemplate restTemplate = RestTemplateFactory.conToken(token);
+            return restTemplate.getForObject(
+                    "http://localhost:8082/api/logistica/solicitudes/contenedor/" + contenedorId + "/tiene-deposito",
+                    Boolean.class);
+        } catch (Exception e) {
+            log.error("No se pudo consultar si el contenedor {} tiene depósito", contenedorId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "No se pudo consultar si el contenedor tiene depósito.");
+        }
     }
 
-    
     // METODO PARA ACTUALIZAR EL ESTADO DEL CONTENEDOR Y GUARDAR EN HISTORIAL
     public Contenedor actualizarEstado(Long contenedorId, Long estadoId, String autHeader) {
 
         Contenedor contenedor = obtenerPorId(contenedorId);
+        log.info("Actualizando estado del contenedor {} a {}", contenedorId, estadoId);
 
         Estado nuevoEstado = estadoRepo.findById(estadoId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado no encontrado"));
 
         String nombreActual = contenedor.getEstado().getNombre();
         String nombreNuevo = nuevoEstado.getNombre();
@@ -154,19 +167,19 @@ public class ContenedorService {
         // Validar transición con depósito
         if (!estadoActual.puedeTransicionarA(nombreNuevo, tieneDeposito)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "No se puede pasar de '" + estadoActual.getNombre() + "' a '" + nombreNuevo + "' en este contexto.");
+                    "No se puede pasar de '" + estadoActual.getNombre() + "' a '" + nombreNuevo
+                            + "' en este contexto.");
         }
 
         // Validar que no se repita un estado en el historial
         boolean yaTieneEsteEstado = historialEstadoRepo.findByContenedorIdOrderByFechaCambioAsc(contenedorId)
-            .stream()
-            .anyMatch(reg -> reg.getEstado().getId().equals(estadoId));
+                .stream()
+                .anyMatch(reg -> reg.getEstado().getId().equals(estadoId));
 
         if (yaTieneEsteEstado) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "El contenedor ya pasó por el estado '" + nombreNuevo + "', no se puede repetir.");
+                    "El contenedor ya pasó por el estado '" + nombreNuevo + "', no se puede repetir.");
         }
-
 
         // Ejecutar lógica del estado OPCIONAL
         estadoActual.ejecutarAccion(contenedor);
@@ -179,39 +192,39 @@ public class ContenedorService {
         historial.setEstado(nuevoEstado);
         historial.setFechaCambio(LocalDate.now());
         historialEstadoRepo.save(historial);
-        
+
         try {
             restTemplate.postForEntity(
-        "http://localhost:8082/api/logistica/tramos-ruta/observer/estado",
-        new NotificarCambioEstadoDto(contenedorId, nuevoEstado.getId(), historial.getFechaCambio()),
-Void.class
-    );
+                    "http://localhost:8082/api/logistica/tramos-ruta/observer/estado",
+                    new NotificarCambioEstadoDto(contenedorId, nuevoEstado.getId(), historial.getFechaCambio()),
+                    Void.class);
         } catch (Exception e) {
-            System.out.println("Error al notificar a Logística: " + e.getMessage());
-    // Podés loguearlo con logger, lanzarlo de nuevo, o ignorarlo según tu necesidad
-    }
+            log.warn("Error al notificar cambio de estado del contenedor {} a logística", contenedorId, e);
+        }
         // Notificar a Logística
-        /*restTemplate.postForEntity(
-            "http://localhost:8082/api/logistica/tramos-ruta/observer/estado",
-            new NotificarCambioEstadoDto(contenedorId, nuevoEstado.getId(), historial.getFechaCambio()),
-            Void.class
-        
-            );*/
+        /*
+         * restTemplate.postForEntity(
+         * "http://localhost:8082/api/logistica/tramos-ruta/observer/estado",
+         * new NotificarCambioEstadoDto(contenedorId, nuevoEstado.getId(),
+         * historial.getFechaCambio()),
+         * Void.class
+         * 
+         * );
+         */
 
-    return contenedor;
+        return contenedor;
     }
 
-
-    //METODO PARA ACCEDER AL HISTORIAL
+    // METODO PARA ACCEDER AL HISTORIAL
     public List<EstadoSimpleDto> obtenerHistorialSimplificado(Long contenedorId) {
         return historialEstadoRepo.findByContenedorIdOrderByFechaCambioAsc(contenedorId).stream()
-            .map(registro -> new EstadoSimpleDto(
-                registro.getEstado().getNombre(),
-                registro.getFechaCambio()
-            )).toList();
+                .map(registro -> new EstadoSimpleDto(
+                        registro.getEstado().getNombre(),
+                        registro.getFechaCambio()))
+                .toList();
     }
 
-    //VALIDACIONDES DE CONTENEDOR
+    // VALIDACIONDES DE CONTENEDOR
     private void validarContenedor(Contenedor contenedor) {
         if (contenedor.getPeso() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El peso debe ser mayor a cero.");
@@ -221,8 +234,8 @@ Void.class
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El volumen debe ser mayor a cero.");
         }
 
-        if (contenedor.getCliente() == null || contenedor.getCliente().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe especificarse un cliente válido.");
+        if (contenedor.getCliente() != null && contenedor.getCliente().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe especificarse un cliente válido cuando se informa uno.");
         }
 
         if (contenedor.getEstado() == null || contenedor.getEstado().getId() == null) {

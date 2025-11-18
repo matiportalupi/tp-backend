@@ -10,8 +10,8 @@ import utn.frc.backend.tpi.pedidos.models.Contenedor;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-16T01:40:30-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-17T22:05:00-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class ContenedorMapperImpl implements ContenedorMapper {
@@ -27,10 +27,10 @@ public class ContenedorMapperImpl implements ContenedorMapper {
 
         ContenedorDTO contenedorDTO = new ContenedorDTO();
 
-        contenedorDTO.setCliente( clienteMapper.toResponseDTO( contenedor.getCliente() ) );
         contenedorDTO.setId( contenedor.getId() );
         contenedorDTO.setPeso( contenedor.getPeso() );
         contenedorDTO.setVolumen( contenedor.getVolumen() );
+        contenedorDTO.setCliente( clienteMapper.toResponseDTO( contenedor.getCliente() ) );
 
         return contenedorDTO;
     }
@@ -43,10 +43,10 @@ public class ContenedorMapperImpl implements ContenedorMapper {
 
         Contenedor contenedor = new Contenedor();
 
-        contenedor.setCliente( clienteResponseDTOToCliente( dto.getCliente() ) );
         contenedor.setId( dto.getId() );
         contenedor.setPeso( dto.getPeso() );
         contenedor.setVolumen( dto.getVolumen() );
+        contenedor.setCliente( clienteResponseDTOToCliente( dto.getCliente() ) );
 
         return contenedor;
     }
@@ -58,9 +58,9 @@ public class ContenedorMapperImpl implements ContenedorMapper {
 
         Cliente cliente = new Cliente();
 
-        cliente.setEmail( clienteResponseDTO.getEmail() );
         cliente.setId( clienteResponseDTO.getId() );
         cliente.setNombre( clienteResponseDTO.getNombre() );
+        cliente.setEmail( clienteResponseDTO.getEmail() );
 
         return cliente;
     }

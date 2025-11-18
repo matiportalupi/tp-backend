@@ -50,12 +50,20 @@ public class Solicitud {
     private Double tiempoEstimadoHoras;
 
     @Column(name = "fecha_estimada_despacho")
-    //@NotNull(message = "La fecha estimada de despacho es obligatoria")
+    // @NotNull(message = "La fecha estimada de despacho es obligatoria")
     private LocalDate fechaEstimadaDespacho;
 
     @Column(name = "es_finalizada", nullable = false)
     private boolean esFinalizada = false;
 
+    @Column(name = "costo_real")
+    private Double costoReal;
+
+    @Column(name = "tiempo_real_horas")
+    private Double tiempoRealHoras;
+
+    @Column(name = "estado_solicitud")
+    private String estadoSolicitud = "BORRADOR"; // BORRADOR, PROGRAMADA, EN_TRANSITO, ENTREGADA
 
     @OneToMany(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

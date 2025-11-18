@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "Flujo E2E - Solicitud de Traslado",
+    "description": "Colección mínima con los endpoints necesarios para ejecutar el flujo end-to-end documentado en flujo.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {"key": "token", "value": "{{access_token}}", "type": "string"}
+    ]
+  },
+  "variable": [
+    {"key": "gateway_base", "value": "http://localhost:8082/api/logistica"},
+    {"key": "solicitud_id", "value": "8"},
+    {"key": "tramo_id", "value": "12"},
+    {"key": "tramo_id_2", "value": "13"},
+    {"key": "camion_id", "value": "1"},
+    {"key": "deposito_id", "value": "2"},
+    {"key": "access_token", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "1 - Crear solicitud",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contenedorId\": 10,\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3\n}"
+        },
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes",
+          "host": ["{{gateway_base}}"],
+          "path": ["solicitudes"]
+        }
+      }
+    },
+    {
+      "name": "2 - Procesar solicitud",
+      "request": {
+        "method": "PUT",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+        },
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
+          "host": ["{{gateway_base}}"],
+          "path": ["solicitudes", "{{solicitud_id}}", "procesar-solicitud"]
+        }
+      }
+    },
+    {
+      "name": "3 - Asignar camión (Tramo 1)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id}}", "asignar-camion", "{{camion_id}}"]
+        }
+      }
+    },
+    {
+      "name": "4 - Iniciar tramo 1",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id}}", "iniciar"]
+        }
+      }
+    },
+    {
+      "name": "5 - Finalizar tramo 1",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id}}", "finalizar"]
+        }
+      }
+    },
+    {
+      "name": "6 - Asignar camión (Tramo 2)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id_2}}", "asignar-camion", "{{camion_id}}"]
+        }
+      }
+    },
+    {
+      "name": "7 - Iniciar tramo 2",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id_2}}", "iniciar"]
+        }
+      }
+    },
+    {
+      "name": "8 - Finalizar tramo 2",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "{{tramo_id_2}}", "finalizar"]
+        }
+      }
+    },
+    {
+      "name": "9 - Finalizar solicitud",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
+          "host": ["{{gateway_base}}"],
+          "path": ["solicitudes", "{{solicitud_id}}", "finalizar"]
+        }
+      }
+    },
+    {
+      "name": "10 - Pendientes",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/pendientes",
+          "host": ["{{gateway_base}}"],
+          "path": ["solicitudes", "pendientes"]
+        }
+      }
+    },
+    {
+      "name": "11 - Resumen cliente",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
+          "host": ["{{gateway_base}}"],
+          "path": ["solicitudes", "{{solicitud_id}}", "resumen-cliente"]
+        }
+      }
+    },
+    {
+      "name": "12 - Mi asignación transportista",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
+          "host": ["{{gateway_base}}"],
+          "path": ["tramos-ruta", "mi-asignacion"]
+        }
+      }
+    }
+  ]
+}

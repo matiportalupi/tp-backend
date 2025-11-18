@@ -1,9 +1,10 @@
 -- ====================
 -- TARIFAS
 -- ====================
-INSERT INTO tarifa (monto_base, costo_por_km) VALUES 
-  (5000.0, 120.0),
-  (7000.0, 150.0);
+INSERT INTO tarifa (tipo_tarifa, peso_minimo, peso_maximo, volumen_minimo, volumen_maximo, costo_base_por_tramo, costo_por_km, costo_combustible_litro, costo_estadia_deposito_dia) VALUES 
+  ('PEQUEÑO', 0.0, 1000.0, 0.0, 10.0, 5000.0, 120.0, 150.0, 500.0),
+  ('MEDIANO', 1000.0, 5000.0, 10.0, 30.0, 7000.0, 150.0, 150.0, 700.0),
+  ('GRANDE', 5000.0, 20000.0, 30.0, 70.0, 10000.0, 200.0, 150.0, 1000.0);
 
 -- ====================
 -- SOLICITUDES
@@ -30,24 +31,25 @@ INSERT INTO tramo_ruta (
     fecha_estimada_llegada,
     fecha_real_llegada,
     distancia,
-    tiempo_estimado
+    tiempo_estimado,
+    estado_tramo
 ) VALUES
-  -- Solicitud 1: Tramos con tipos definidos
-  (1, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-02', '2025-07-03', '2025-07-01', '2025-07-02', NULL, NULL),
-  (1, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-03', '2025-07-04', NULL, NULL, NULL, NULL),
+  -- Solicitud 1: Tramos ASIGNADO e INICIADO (para transportista)
+  (1, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-02', '2025-07-03', '2025-07-01', '2025-07-02', 150.5, 3.5, 'ASIGNADO'),
+  (1, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-03', '2025-07-04', NULL, NULL, 200.0, 4.0, 'ASIGNADO'),
   
-  -- Solicitud 2: Tramos con tipos definidos
-  (2, 2, 'CIUDAD', 3, 'DEPOSITO', 1, '2025-07-05', '2025-07-06', NULL, NULL, NULL, NULL),
-  (2, 3, 'DEPOSITO', 4, 'CIUDAD', 2, '2025-07-07', '2025-07-08', NULL, NULL, NULL, NULL),
+  -- Solicitud 2: Tramos INICIADO
+  (2, 2, 'CIUDAD', 3, 'DEPOSITO', 1, '2025-07-05', '2025-07-06', NULL, NULL, 180.0, 3.8, 'INICIADO'),
+  (2, 3, 'DEPOSITO', 4, 'CIUDAD', 2, '2025-07-07', '2025-07-08', NULL, NULL, 220.0, 4.2, 'ESTIMADO'),
   
-  -- Solicitud 3: Tramos con tipos definidos
-  (3, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', NULL, NULL),
-  (3, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-11', '2025-07-11', '2025-07-12', '2025-07-12', NULL, NULL),
+  -- Solicitud 3: Tramos FINALIZADO
+  (3, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', 150.5, 3.5, 'FINALIZADO'),
+  (3, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-11', '2025-07-11', '2025-07-12', '2025-07-12', 200.0, 4.0, 'FINALIZADO'),
 
-  -- Solicitud 4: Tramos con tipos definidos
-  (4, 3, 'CIUDAD', 4, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', NULL, NULL),
-  (4, 4, 'DEPOSITO', 5, 'CIUDAD', 2, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-11', NULL, NULL),
+  -- Solicitud 4: Tramos variados
+  (4, 3, 'CIUDAD', 4, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', 180.0, 3.8, 'ESTIMADO'),
+  (4, 4, 'DEPOSITO', 5, 'CIUDAD', 2, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-11', 220.0, 4.2, 'ESTIMADO'),
 
-  -- Solicitud 5: Tramos con tipos definidos
-  (5, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-09', NULL, NULL),
-  (5, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', NULL, NULL);
+  -- Solicitud 5: Tramos ASIGNADO
+  (5, 1, 'CIUDAD', 2, 'DEPOSITO', 1, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-09', 150.5, 3.5, 'ASIGNADO'),
+  (5, 2, 'DEPOSITO', 3, 'CIUDAD', 2, '2025-07-09', '2025-07-09', '2025-07-10', '2025-07-10', 200.0, 4.0, 'ESTIMADO');
