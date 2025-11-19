@@ -40,322 +40,322 @@
     {
       "name": "Flujo Completo de Solicitud de Transporte",
       "item": [
-    {
-      "name": "1 - Crear solicitud",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3,\n  \"nuevoCliente\":{\n    \"nombre\": \"Cliente10 Demo\",\n    \"email\": \"cliente10@example.com\",\n    \"password\": \"secreto123\"\n    },\n    \"nuevoContenedor\": {\n        \"peso\": 1200,\n        \"volumen\": 25,\n        \"estadoId\": 5\n    }\n}"
-        },
-        "url": {
-          "raw": "{{logistica_base}}/solicitudes",
-          "host": [
-            "{{logistica_base}}"
-          ],
-          "path": [
-            "solicitudes"
-          ]
-        }
-      },
-      "event": [
         {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "// Script para leer un NUEVO CLIENTE del body y crearlo en Keycloak.",
-              "const done = pm.globals.get('done');",
-              "",
-              "async function createClientFromRequest() {",
-              "    try {",
-              "        // Extraer datos del nuevo cliente desde el body de la petición",
-              "        const requestBody = JSON.parse(pm.request.body.raw);",
-              "        const newClient = requestBody.nuevoCliente;",
-              "",
-              "        if (!newClient || !newClient.email || !newClient.password) {",
-              "            console.log(\"No se encontró 'nuevoCliente' en el body. No se creará usuario en Keycloak.\");",
-              "            return; // No hace nada si no hay datos de cliente",
-              "        }",
-              "",
-              "        console.log(`Intentando crear usuario en Keycloak para: ${newClient.email}`);",
-              "",
-              "        // 1. Obtener token de admin para Keycloak",
-              "        const tokenResponse = await pm.sendRequest({",
-              "            url: `${pm.collectionVariables.get('keycloak_base')}/realms/master/protocol/openid-connect/token`,",
-              "            method: 'POST',",
-              "            header: {'Content-Type': 'application/x-www-form-urlencoded'},",
-              "            body: {",
-              "                mode: 'urlencoded',",
-              "                urlencoded: [",
-              "                    {key: 'client_id', value: 'admin-cli'},",
-              "                    {key: 'username', value: pm.collectionVariables.get('username')},",
-              "                    {key: 'password', value: pm.collectionVariables.get('password')},",
-              "                    {key: 'grant_type', value: 'password'}",
-              "                ]",
-              "            }",
-              "        });",
-              "        const adminToken = tokenResponse.json().access_token;",
-              "        console.log('✅ Token de admin de Keycloak obtenido.');",
-              "",
-              "        // 2. Crear usuario en Keycloak",
-              "        const createUserResponse = await pm.sendRequest({",
-              "            url: `${pm.collectionVariables.get('keycloak_base')}/admin/realms/${pm.collectionVariables.get('realm')}/users`,",
-              "            method: 'POST',",
-              "            header: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },",
-              "            body: {",
-              "                mode: 'raw',",
-              "                raw: JSON.stringify({",
-              "                    username: newClient.email,",
-              "                    email: newClient.email,",
-              "                    enabled: true,",
-              "                    credentials: [{type: 'password', value: newClient.password, temporary: false}]",
-              "                })",
-              "            }",
-              "        });",
-              "",
-              "        if (createUserResponse.code >= 300) {",
-              "            throw new Error(`Error al crear usuario en Keycloak: ${createUserResponse.status} - ${createUserResponse.text()}`);",
-              "        }",
-              "        console.log('✅ Usuario creado en Keycloak.');",
-              "",
-              "    } catch (err) {",
-              "        console.error('❌ Falló el script de pre-request:', err);",
-              "        // Detiene la ejecución de la petición principal si hay un error",
-              "        throw err;",
-              "    } finally {",
-              "        if (typeof done === 'function') {",
-              "            done();",
-              "        }",
-              "    }",
-              "}",
-              "",
-              "createClientFromRequest();"
-            ]
+          "name": "1 - Crear solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3,\n  \"nuevoCliente\":{\n    \"nombre\": \"Cliente10 Demo\",\n    \"email\": \"cliente10@example.com\",\n    \"password\": \"secreto123\"\n    },\n    \"nuevoContenedor\": {\n        \"peso\": 1200,\n        \"volumen\": 25,\n        \"estadoId\": 5\n    }\n}"
+            },
+            "url": {
+              "raw": "{{logistica_base}}/solicitudes",
+              "host": [
+                "{{logistica_base}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Script para leer un NUEVO CLIENTE del body y crearlo en Keycloak.",
+                  "const done = pm.globals.get('done');",
+                  "",
+                  "async function createClientFromRequest() {",
+                  "    try {",
+                  "        // Extraer datos del nuevo cliente desde el body de la petición",
+                  "        const requestBody = JSON.parse(pm.request.body.raw);",
+                  "        const newClient = requestBody.nuevoCliente;",
+                  "",
+                  "        if (!newClient || !newClient.nombre || !newClient.email || !newClient.password) {",
+                  "            console.log(\"No se encontró 'nuevoCliente' con nombre/email/password en el body. No se creará usuario en Keycloak.\");",
+                  "            return; // No hace nada si no hay datos de cliente",
+                  "        }",
+                  "",
+                  "        console.log(`Intentando crear usuario en Keycloak para: ${newClient.nombre}`);",
+                  "",
+                  "        // 1. Obtener token de admin para Keycloak",
+                  "        const tokenResponse = await pm.sendRequest({",
+                  "            url: `${pm.collectionVariables.get('keycloak_base')}/realms/master/protocol/openid-connect/token`,",
+                  "            method: 'POST',",
+                  "            header: {'Content-Type': 'application/x-www-form-urlencoded'},",
+                  "            body: {",
+                  "                mode: 'urlencoded',",
+                  "                urlencoded: [",
+                  "                    {key: 'client_id', value: 'admin-cli'},",
+                  "                    {key: 'username', value: pm.collectionVariables.get('username')},",
+                  "                    {key: 'password', value: pm.collectionVariables.get('password')},",
+                  "                    {key: 'grant_type', value: 'password'}",
+                  "                ]",
+                  "            }",
+                  "        });",
+                  "        const adminToken = tokenResponse.json().access_token;",
+                  "        console.log('✅ Token de admin de Keycloak obtenido.');",
+                  "",
+                  "        // 2. Crear usuario en Keycloak",
+                  "        const createUserResponse = await pm.sendRequest({",
+                  "            url: `${pm.collectionVariables.get('keycloak_base')}/admin/realms/${pm.collectionVariables.get('realm')}/users`,",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    username: newClient.nombre,",
+                  "                    email: newClient.email,",
+                  "                    enabled: true,",
+                  "                    credentials: [{type: 'password', value: newClient.password, temporary: false}]",
+                  "                })",
+                  "            }",
+                  "        });",
+                  "",
+                  "        if (createUserResponse.code >= 300) {",
+                  "            throw new Error(`Error al crear usuario en Keycloak: ${createUserResponse.status} - ${createUserResponse.text()}`);",
+                  "        }",
+                  "        console.log('✅ Usuario creado en Keycloak.');",
+                  "",
+                  "    } catch (err) {",
+                  "        console.error('❌ Falló el script de pre-request:', err);",
+                  "        // Detiene la ejecución de la petición principal si hay un error",
+                  "        throw err;",
+                  "    } finally {",
+                  "        if (typeof done === 'function') {",
+                  "            done();",
+                  "        }",
+                  "    }",
+                  "}",
+                  "",
+                  "createClientFromRequest();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 - Procesar solicitud",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+            },
+            "url": {
+              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitud_id}}",
+                "procesar-solicitud"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3 - Asignar camión (Tramo 1)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id}}",
+                "asignar-camion",
+                "{{camion_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4 - Iniciar tramo 1",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id}}",
+                "iniciar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5 - Finalizar tramo 1",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id}}",
+                "finalizar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6 - Asignar camión (Tramo 2)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id_2}}",
+                "asignar-camion",
+                "{{camion_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "7 - Iniciar tramo 2",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id_2}}",
+                "iniciar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8 - Finalizar tramo 2",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "{{tramo_id_2}}",
+                "finalizar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9 - Finalizar solicitud",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitud_id}}",
+                "finalizar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10 - Pendientes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_base}}/solicitudes/pendientes",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "pendientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11 - Resumen cliente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitud_id}}",
+                "resumen-cliente"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2 - Consultar Estado Transporte",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{pedidos_base}}/contenedores/{{solicitud_id}}/seguimiento",
+              "host": [
+                "{{pedidos_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitud_id}}",
+                "resumen-cliente"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12 - Mi asignación transportista",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
+              "host": [
+                "{{gateway_base}}"
+              ],
+              "path": [
+                "tramos-ruta",
+                "mi-asignacion"
+              ]
+            }
           }
         }
       ]
-    },
-    {
-      "name": "2 - Procesar solicitud",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
-        },
-        "url": {
-          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "solicitudes",
-            "{{solicitud_id}}",
-            "procesar-solicitud"
-          ]
-        }
-      }
-    },
-    {
-      "name": "3 - Asignar camión (Tramo 1)",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id}}",
-            "asignar-camion",
-            "{{camion_id}}"
-          ]
-        }
-      }
-    },
-    {
-      "name": "4 - Iniciar tramo 1",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id}}",
-            "iniciar"
-          ]
-        }
-      }
-    },
-    {
-      "name": "5 - Finalizar tramo 1",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id}}",
-            "finalizar"
-          ]
-        }
-      }
-    },
-    {
-      "name": "6 - Asignar camión (Tramo 2)",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id_2}}",
-            "asignar-camion",
-            "{{camion_id}}"
-          ]
-        }
-      }
-    },
-    {
-      "name": "7 - Iniciar tramo 2",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id_2}}",
-            "iniciar"
-          ]
-        }
-      }
-    },
-    {
-      "name": "8 - Finalizar tramo 2",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "{{tramo_id_2}}",
-            "finalizar"
-          ]
-        }
-      }
-    },
-    {
-      "name": "9 - Finalizar solicitud",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "solicitudes",
-            "{{solicitud_id}}",
-            "finalizar"
-          ]
-        }
-      }
-    },
-    {
-      "name": "10 - Pendientes",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{gateway_base}}/solicitudes/pendientes",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "solicitudes",
-            "pendientes"
-          ]
-        }
-      }
-    },
-    {
-      "name": "11 - Resumen cliente",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "solicitudes",
-            "{{solicitud_id}}",
-            "resumen-cliente"
-          ]
-        }
-      }
-    },
-    {
-      "name": "2 - Consultar Estado Transporte",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{pedidos_base}}/contenedores/{{solicitud_id}}/seguimiento",
-          "host": [
-            "{{pedidos_base}}"
-          ],
-          "path": [
-            "solicitudes",
-            "{{solicitud_id}}",
-            "resumen-cliente"
-          ]
-        }
-      }
-    },
-    {
-      "name": "12 - Mi asignación transportista",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
-          "host": [
-            "{{gateway_base}}"
-          ],
-          "path": [
-            "tramos-ruta",
-            "mi-asignacion"
-          ]
-        }
-      }
-    }
-  ]
     },
     {
       "name": "Keycloak",
@@ -454,7 +454,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"capacidadPeso\": 15000,\n  \"volumen\": 60,\n  \"disponibilidad\": true\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"capacidadPeso\": 15000,\n  \"volumen\": 60,\n  \"disponibilidad\": true\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/camiones"
               }
             },
@@ -463,7 +467,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"capacidadPeso\": 18000,\n  \"volumen\": 65,\n  \"disponibilidad\": false\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"capacidadPeso\": 18000,\n  \"volumen\": 65,\n  \"disponibilidad\": false\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/camiones/{{camion_id}}"
               }
             },
@@ -480,7 +488,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"Cliente Demo\",\n  \"email\": \"cliente@example.com\",\n  \"password\": \"secreto123\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Cliente Demo\",\n  \"email\": \"cliente@example.com\",\n  \"password\": \"secreto123\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/clientes"
               },
               "event": [
@@ -514,7 +526,7 @@
                       "",
                       "        // 2. Crear usuario en Keycloak",
                       "        const clientData = JSON.parse(pm.request.body.raw);",
-                      "        console.log(`Intentando crear usuario: ${clientData.email}`);",
+                      "        console.log(`Intentando crear usuario: ${clientData.nombre}`);",
                       "        const createUserResponse = await pm.sendRequest({",
                       "            url: `${pm.collectionVariables.get('keycloak_base')}/admin/realms/${pm.collectionVariables.get('realm')}/users`,",
                       "            method: 'POST',",
@@ -525,7 +537,7 @@
                       "            body: {",
                       "                mode: 'raw',",
                       "                raw: JSON.stringify({",
-                      "                    username: clientData.email,",
+                      "                    username: clientData.nombre,",
                       "                    email: clientData.email,",
                       "                    enabled: true,",
                       "                    credentials: [{type: 'password', value: clientData.password, temporary: false}]",
@@ -560,7 +572,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"Cliente Actualizado\",\n  \"email\": \"cliente.actualizado@example.com\",\n  \"password\": \"nuevaPass1\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Cliente Actualizado\",\n  \"email\": \"cliente.actualizado@example.com\",\n  \"password\": \"nuevaPass1\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/clientes/{{cliente_id}}"
               }
             },
@@ -578,7 +594,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Av. Siempre Viva 123\",\n  \"latitud\": -31.41,\n  \"longitud\": -64.18\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Av. Siempre Viva 123\",\n  \"latitud\": -31.41,\n  \"longitud\": -64.18\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/depositos"
               }
             },
@@ -587,7 +607,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Ruta 20 Km 5\",\n  \"latitud\": -31.50,\n  \"longitud\": -64.20\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ciudadId\": {{ciudad_id}},\n  \"direccion\": \"Ruta 20 Km 5\",\n  \"latitud\": -31.50,\n  \"longitud\": -64.20\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/depositos/{{deposito_id}}"
               }
             },
@@ -604,7 +628,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"En Deposito\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"En Deposito\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/estados"
               }
             },
@@ -613,7 +641,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"nombre\": \"En Ruta\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"En Ruta\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/estados/{{estado_id}}"
               }
             },
@@ -630,7 +662,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"peso\": 1200,\n  \"volumen\": 25,\n  \"clienteId\": {{cliente_id}},\n  \"estadoId\": {{estado_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"peso\": 1200,\n  \"volumen\": 25,\n  \"clienteId\": {{cliente_id}},\n  \"estadoId\": {{estado_id}}\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/contenedores"
               }
             },
@@ -639,7 +675,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"id\": {{contenedor_id}},\n  \"peso\": 1100,\n  \"volumen\": 23,\n  \"cliente\": {\n    \"id\": {{cliente_id}},\n    \"nombre\": \"Cliente Demo\",\n    \"email\": \"cliente@example.com\"\n  }\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{contenedor_id}},\n  \"peso\": 1100,\n  \"volumen\": 23,\n  \"cliente\": {\n    \"id\": {{cliente_id}},\n    \"nombre\": \"Cliente Demo\",\n    \"email\": \"cliente@example.com\"\n  }\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}"
               }
             },
@@ -650,7 +690,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"id\": {{estado_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{estado_id}}\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{pedidos_base}}/contenedores/{{contenedor_id}}/estado"
               }
             },
@@ -675,7 +719,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}}\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/solicitudes"
               }
             },
@@ -684,7 +732,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-01-10\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-01-10\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud"
               }
             },
@@ -693,7 +745,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"id\": {{solicitud_id}},\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}},\n  \"depositoId\": {{deposito_id}},\n  \"camionId\": {{camion_id}},\n  \"costoEstimado\": 150000,\n  \"tiempoEstimadoHoras\": 72,\n  \"fechaEstimadaDespacho\": \"2025-01-05\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{solicitud_id}},\n  \"contenedorId\": {{contenedor_id}},\n  \"ciudadOrigenId\": {{ciudad_id}},\n  \"ciudadDestinoId\": {{ciudad_id}},\n  \"depositoId\": {{deposito_id}},\n  \"camionId\": {{camion_id}},\n  \"costoEstimado\": 150000,\n  \"tiempoEstimadoHoras\": 72,\n  \"fechaEstimadaDespacho\": \"2025-01-05\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/solicitudes/{{solicitud_id}}"
               }
             },
@@ -724,7 +780,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{deposito_id}},\n  \"destinoTipo\": \"DEPOSITO\",\n  \"fechaEstimadaSalida\": \"2025-01-05\",\n  \"fechaEstimadaLlegada\": \"2025-01-07\",\n  \"distancia\": 750,\n  \"tiempoEstimado\": 48\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{deposito_id}},\n  \"destinoTipo\": \"DEPOSITO\",\n  \"fechaEstimadaSalida\": \"2025-01-05\",\n  \"fechaEstimadaLlegada\": \"2025-01-07\",\n  \"distancia\": 750,\n  \"tiempoEstimado\": 48\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/tramos-ruta"
               }
             },
@@ -733,7 +793,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"id\": {{tramo_id}},\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{ciudad_id}},\n  \"destinoTipo\": \"CIUDAD\",\n  \"distancia\": 550,\n  \"tiempoEstimado\": 36\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{tramo_id}},\n  \"origenId\": {{ciudad_id}},\n  \"origenTipo\": \"CIUDAD\",\n  \"destinoId\": {{ciudad_id}},\n  \"destinoTipo\": \"CIUDAD\",\n  \"distancia\": 550,\n  \"tiempoEstimado\": 36\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/tramos-ruta/{{tramo_id}}"
               }
             },
@@ -743,7 +807,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"estadoId\": {{estado_id}},\n  \"fechaCambio\": \"2025-01-05\"\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contenedorId\": {{contenedor_id}},\n  \"estadoId\": {{estado_id}},\n  \"fechaCambio\": \"2025-01-05\"\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/tramos-ruta/observer/estado"
               }
             },
@@ -787,7 +855,11 @@
               "request": {
                 "method": "POST",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1200,\n  \"costoPorKm\": 45,\n  \"costoCombustibleLitro\": 180,\n  \"costoEstadiaDepositoDia\": 500\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1200,\n  \"costoPorKm\": 45,\n  \"costoCombustibleLitro\": 180,\n  \"costoEstadiaDepositoDia\": 500\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/tarifas"
               }
             },
@@ -796,7 +868,11 @@
               "request": {
                 "method": "PUT",
                 "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1500,\n  \"costoPorKm\": 50,\n  \"costoCombustibleLitro\": 200,\n  \"costoEstadiaDepositoDia\": 600\n}", "options": {"raw": {"language": "json"}}},
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoTarifa\": \"MEDIANO\",\n  \"pesoMinimo\": 1000,\n  \"pesoMaximo\": 5000,\n  \"volumenMinimo\": 10,\n  \"volumenMaximo\": 30,\n  \"costoBasePorTramo\": 1500,\n  \"costoPorKm\": 50,\n  \"costoCombustibleLitro\": 200,\n  \"costoEstadiaDepositoDia\": 600\n}",
+                  "options": {"raw": {"language": "json"}}
+                },
                 "url": "{{logistica_base}}/tarifas/{{tarifa_id}}"
               }
             },
