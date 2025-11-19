@@ -617,3 +617,26 @@ Caused by: java.net.ConnectException: Connection refused
 2025-11-19 11:20:30.583 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
 2025-11-19 11:20:30.628 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 4.719 seconds (process running for 5.374)
 2025-11-19 11:21:11.440 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2025-11-19 12:26:52.058 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-11-19 12:26:52.150 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Starting GatewayApplication using Java 21.0.8 with PID 70873 (/Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/gateway/target/classes started by bisiojuan in /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/gateway)
+2025-11-19 12:26:52.151 DEBUG [main] u.f.b.tpi.gateway.GatewayApplication - Running with Spring Boot v3.1.4, Spring v6.0.12
+2025-11-19 12:26:52.152 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-19 12:26:54.019 INFO  [main] o.s.cloud.context.scope.GenericScope - BeanFactory id=d23dbb4f-54ee-3ef3-89d5-44a108f2630f
+2025-11-19 12:26:56.151 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-19 12:26:56.152 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-19 12:26:56.152 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-19 12:26:56.152 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-19 12:26:56.152 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-19 12:26:56.152 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-19 12:26:56.153 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-19 12:26:56.154 INFO  [main] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-19 12:26:57.698 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoint(s) beneath base path '/actuator'
+2025-11-19 12:26:58.444 INFO  [main] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8082
+2025-11-19 12:26:58.580 INFO  [main] u.f.b.tpi.gateway.GatewayApplication - Started GatewayApplication in 7.538 seconds (process running for 8.126)
+2025-11-19 12:27:22.013 ERROR [parallel-1] i.n.r.d.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
