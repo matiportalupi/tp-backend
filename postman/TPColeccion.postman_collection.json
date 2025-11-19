@@ -33,9 +33,330 @@
     {"key": "contenedor_id", "value": "1"},
     {"key": "solicitud_id", "value": "1"},
     {"key": "tarifa_id", "value": "1"},
+    {"key": "client_secret", "value": "msdywX1vQ0Q4n7IE8hS69uIAkRMIalj9"},
     {"key": "tramo_id", "value": "1"}
   ],
   "item": [
+    {
+      "name": "Flujo Completo de Solicitud de Transporte",
+      "item": [
+    {
+      "name": "1 - Crear solicitud",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3,\n  \"nuevoCliente\":{\n    \"nombre\": \"Cliente10 Demo\",\n    \"email\": \"cliente10@example.com\",\n    \"password\": \"secreto123\"\n    },\n    \"nuevoContenedor\": {\n        \"peso\": 1200,\n        \"volumen\": 25,\n        \"estadoId\": 5\n    }\n}"
+        },
+        "url": {
+          "raw": "{{logistica_base}}/solicitudes",
+          "host": [
+            "{{logistica_base}}"
+          ],
+          "path": [
+            "solicitudes"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Script para leer un NUEVO CLIENTE del body y crearlo en Keycloak.",
+              "const done = pm.globals.get('done');",
+              "",
+              "async function createClientFromRequest() {",
+              "    try {",
+              "        // Extraer datos del nuevo cliente desde el body de la petición",
+              "        const requestBody = JSON.parse(pm.request.body.raw);",
+              "        const newClient = requestBody.nuevoCliente;",
+              "",
+              "        if (!newClient || !newClient.email || !newClient.password) {",
+              "            console.log(\"No se encontró 'nuevoCliente' en el body. No se creará usuario en Keycloak.\");",
+              "            return; // No hace nada si no hay datos de cliente",
+              "        }",
+              "",
+              "        console.log(`Intentando crear usuario en Keycloak para: ${newClient.email}`);",
+              "",
+              "        // 1. Obtener token de admin para Keycloak",
+              "        const tokenResponse = await pm.sendRequest({",
+              "            url: `${pm.collectionVariables.get('keycloak_base')}/realms/master/protocol/openid-connect/token`,",
+              "            method: 'POST',",
+              "            header: {'Content-Type': 'application/x-www-form-urlencoded'},",
+              "            body: {",
+              "                mode: 'urlencoded',",
+              "                urlencoded: [",
+              "                    {key: 'client_id', value: 'admin-cli'},",
+              "                    {key: 'username', value: pm.collectionVariables.get('username')},",
+              "                    {key: 'password', value: pm.collectionVariables.get('password')},",
+              "                    {key: 'grant_type', value: 'password'}",
+              "                ]",
+              "            }",
+              "        });",
+              "        const adminToken = tokenResponse.json().access_token;",
+              "        console.log('✅ Token de admin de Keycloak obtenido.');",
+              "",
+              "        // 2. Crear usuario en Keycloak",
+              "        const createUserResponse = await pm.sendRequest({",
+              "            url: `${pm.collectionVariables.get('keycloak_base')}/admin/realms/${pm.collectionVariables.get('realm')}/users`,",
+              "            method: 'POST',",
+              "            header: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },",
+              "            body: {",
+              "                mode: 'raw',",
+              "                raw: JSON.stringify({",
+              "                    username: newClient.email,",
+              "                    email: newClient.email,",
+              "                    enabled: true,",
+              "                    credentials: [{type: 'password', value: newClient.password, temporary: false}]",
+              "                })",
+              "            }",
+              "        });",
+              "",
+              "        if (createUserResponse.code >= 300) {",
+              "            throw new Error(`Error al crear usuario en Keycloak: ${createUserResponse.status} - ${createUserResponse.text()}`);",
+              "        }",
+              "        console.log('✅ Usuario creado en Keycloak.');",
+              "",
+              "    } catch (err) {",
+              "        console.error('❌ Falló el script de pre-request:', err);",
+              "        // Detiene la ejecución de la petición principal si hay un error",
+              "        throw err;",
+              "    } finally {",
+              "        if (typeof done === 'function') {",
+              "            done();",
+              "        }",
+              "    }",
+              "}",
+              "",
+              "createClientFromRequest();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Procesar solicitud",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+        },
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "procesar-solicitud"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3 - Asignar camión (Tramo 1)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "asignar-camion",
+            "{{camion_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4 - Iniciar tramo 1",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "iniciar"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5 - Finalizar tramo 1",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "finalizar"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6 - Asignar camión (Tramo 2)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "asignar-camion",
+            "{{camion_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7 - Iniciar tramo 2",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "iniciar"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8 - Finalizar tramo 2",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "finalizar"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9 - Finalizar solicitud",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "finalizar"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10 - Pendientes",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/pendientes",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "pendientes"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11 - Resumen cliente",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "resumen-cliente"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2 - Consultar Estado Transporte",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{pedidos_base}}/contenedores/{{solicitud_id}}/seguimiento",
+          "host": [
+            "{{pedidos_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "resumen-cliente"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12 - Mi asignación transportista",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "mi-asignacion"
+          ]
+        }
+      }
+    }
+  ]
+    },
     {
       "name": "Keycloak",
       "item": [
@@ -53,7 +374,8 @@
                 {"key": "client_id", "value": "{{client_id}}"},
                 {"key": "grant_type", "value": "password"},
                 {"key": "username", "value": "{{username}}"},
-                {"key": "password", "value": "{{password}}"}
+                {"key": "password", "value": "{{password}}"},
+                {"key": "client_secret", "value": "{{client_secret}}"}
               ]
             },
             "url": "{{keycloak_base}}/realms/{{realm}}/protocol/openid-connect/token"

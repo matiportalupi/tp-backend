@@ -18,7 +18,15 @@
   "variable": [
     {
       "key": "gateway_base",
-      "value": "http://localhost:8082/api/logistica"
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "logistica_base",
+      "value": "{{gateway_base}}/api/logistica"
+    },
+    {
+      "key": "pedidos_base",
+      "value": "{{gateway_base}}/api/pedidos"
     },
     {
       "key": "solicitud_id",
@@ -74,12 +82,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"contenedorId\": 10,\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3\n}"
+          "raw": "{\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3,\n  \"nuevoCliente\":{\n    \"nombre\": \"Cliente10 Demo\",\n    \"email\": \"cliente10@example.com\",\n    \"password\": \"secreto123\"\n    },\n    \"nuevoContenedor\": {\n        \"peso\": 1200,\n        \"volumen\": 25,\n        \"estadoId\": 5\n    }\n}"
         },
         "url": {
-          "raw": "{{gateway_base}}/solicitudes",
+          "raw": "{{logistica_base}}/solicitudes",
           "host": [
-            "{{gateway_base}}"
+            "{{logistica_base}}"
           ],
           "path": [
             "solicitudes"
@@ -335,6 +343,23 @@
           "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
           "host": [
             "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "resumen-cliente"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2 - Consultar Estado Transporte",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{pedidos_base}}/contenedores/{{solicitud_id}}/seguimiento",
+          "host": [
+            "{{pedidos_base}}"
           ],
           "path": [
             "solicitudes",
