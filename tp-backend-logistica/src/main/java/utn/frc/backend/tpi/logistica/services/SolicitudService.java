@@ -16,7 +16,9 @@ import utn.frc.backend.tpi.logistica.config.RestTemplateFactory;
 import utn.frc.backend.tpi.logistica.dtos.CamionDto;
 import utn.frc.backend.tpi.logistica.dtos.ClienteDto;
 import utn.frc.backend.tpi.logistica.dtos.ClienteNuevoDTO;
+import utn.frc.backend.tpi.logistica.dtos.ContenedorCreacionRequest;
 import utn.frc.backend.tpi.logistica.dtos.ContenedorDto;
+import utn.frc.backend.tpi.logistica.dtos.ContenedorNuevoDTO;
 import utn.frc.backend.tpi.logistica.dtos.EstadoSimpleDTO;
 import utn.frc.backend.tpi.logistica.dtos.SolicitudResumenClienteDTO;
 import utn.frc.backend.tpi.logistica.exceptions.BusinessException;
@@ -28,6 +30,7 @@ import utn.frc.backend.tpi.logistica.repositories.SolicitudRepository;
 public class SolicitudService {
 
     private static final Logger log = LoggerFactory.getLogger(SolicitudService.class);
+    private static final long ESTADO_INICIAL_CONTENEDOR = 5L;
 
     @Autowired
     private SolicitudRepository solicitudRepo;
@@ -74,29 +77,41 @@ public class SolicitudService {
         }
     }
 
-    public Solicitud crearPeticionTraslado(Solicitud solicitud, ClienteNuevoDTO nuevoCliente, String autHeader) {
-
+    public Solicitud crearPeticionTraslado(Solicitud solicitud, ClienteNuevoDTO nuevoCliente,
+            ContenedorNuevoDTO nuevoContenedor, String autHeader) {
         String token = autHeader.replace("Bearer ", "");
         RestTemplate restTemplate = RestTemplateFactory.conToken(token);
-        // 1. Obtener contenedor
-        String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
-        ContenedorDto contenedor = restTemplate.getForObject(contenedorUrl, ContenedorDto.class);
-        if (contenedor == null) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Contenedor no encontrado");
-        }
 
-        contenedor = asociarClienteNuevoSiCorresponde(nuevoCliente, contenedor, restTemplate);
+        ContenedorDto contenedor = obtenerOGenerarContenedor(solicitud, nuevoCliente, nuevoContenedor,
+                restTemplate);
+
         validarContenedorTieneCliente(contenedor);
 
-        // 2. Validar que el contenedor no esté ya asignado a otra solicitud
         Optional<Solicitud> existente = solicitudRepo.findByContenedorId(solicitud.getContenedorId());
         if (existente.isPresent()) {
             throw new BusinessException(HttpStatus.CONFLICT, "El contenedor ya está asignado a otra solicitud.");
         }
+
+        solicitud.setEstadoSolicitud("BORRADOR");
+        solicitud.setEsFinalizada(false);
+
         log.info("Creando petición de traslado para contenedor {} desde {} hacia {}",
                 solicitud.getContenedorId(), solicitud.getCiudadOrigenId(), solicitud.getCiudadDestinoId());
         return solicitudRepo.save(solicitud);
+    }
 
+    private ContenedorDto obtenerOGenerarContenedor(Solicitud solicitud, ClienteNuevoDTO nuevoCliente,
+            ContenedorNuevoDTO nuevoContenedor, RestTemplate restTemplate) {
+        if (solicitud.getContenedorId() != null) {
+            String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
+            ContenedorDto contenedor = restTemplate.getForObject(contenedorUrl, ContenedorDto.class);
+            if (contenedor == null) {
+                throw new BusinessException(HttpStatus.NOT_FOUND, "Contenedor no encontrado");
+            }
+            return asociarClienteNuevoSiCorresponde(nuevoCliente, contenedor, restTemplate);
+        }
+
+        return crearContenedorNuevo(nuevoCliente, nuevoContenedor, restTemplate, solicitud);
     }
 
     private ContenedorDto asociarClienteNuevoSiCorresponde(ClienteNuevoDTO nuevoCliente, ContenedorDto contenedor,
@@ -110,17 +125,64 @@ public class SolicitudService {
                     "El contenedor ya posee un cliente asignado. No se puede registrar uno nuevo.");
         }
 
-        validarDatosCliente(nuevoCliente);
-        ClienteDto clienteCreado = restTemplate.postForObject(baseUrl + "/clientes", nuevoCliente, ClienteDto.class);
-        if (clienteCreado == null || clienteCreado.getId() == null) {
-            throw new BusinessException(HttpStatus.BAD_GATEWAY, "No se pudo registrar el nuevo cliente.");
-        }
+        ClienteDto clienteCreado = registrarNuevoCliente(nuevoCliente, restTemplate);
 
         contenedor.setCliente(clienteCreado);
         restTemplate.put(baseUrl + "/contenedores/" + contenedor.getId(), contenedor);
         ContenedorDto actualizado = restTemplate.getForObject(baseUrl + "/contenedores/" + contenedor.getId(),
                 ContenedorDto.class);
         return actualizado != null ? actualizado : contenedor;
+    }
+
+    private ContenedorDto crearContenedorNuevo(ClienteNuevoDTO nuevoCliente, ContenedorNuevoDTO nuevoContenedor,
+            RestTemplate restTemplate, Solicitud solicitud) {
+        if (nuevoContenedor == null) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "Debe indicar un contenedor existente o los datos de un nuevo contenedor.");
+        }
+
+        validarDatosContenedorNuevo(nuevoContenedor);
+
+        Long clienteId = nuevoContenedor.getClienteId();
+        ClienteDto clienteCreado = null;
+
+        if (clienteId == null) {
+            if (nuevoCliente == null) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "El nuevo contenedor requiere un cliente existente o los datos del nuevo cliente.");
+            }
+            clienteCreado = registrarNuevoCliente(nuevoCliente, restTemplate);
+            clienteId = clienteCreado.getId();
+        } else if (nuevoCliente != null) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "Si se indica clienteId en el contenedor no se deben enviar los datos de un nuevo cliente.");
+        }
+
+        Long estadoId = nuevoContenedor.getEstadoId() != null ? nuevoContenedor.getEstadoId()
+                : ESTADO_INICIAL_CONTENEDOR;
+
+        ContenedorCreacionRequest request = new ContenedorCreacionRequest(
+                nuevoContenedor.getPeso(),
+                nuevoContenedor.getVolumen(),
+                clienteId,
+                estadoId);
+
+        ContenedorDto creado = restTemplate.postForObject(baseUrl + "/contenedores", request, ContenedorDto.class);
+        if (creado == null || creado.getId() == null) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "No se pudo registrar el nuevo contenedor.");
+        }
+
+        solicitud.setContenedorId(creado.getId());
+        return creado;
+    }
+
+    private ClienteDto registrarNuevoCliente(ClienteNuevoDTO nuevoCliente, RestTemplate restTemplate) {
+        validarDatosCliente(nuevoCliente);
+        ClienteDto clienteCreado = restTemplate.postForObject(baseUrl + "/clientes", nuevoCliente, ClienteDto.class);
+        if (clienteCreado == null || clienteCreado.getId() == null) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "No se pudo registrar el nuevo cliente.");
+        }
+        return clienteCreado;
     }
 
     private void validarDatosCliente(ClienteNuevoDTO nuevoCliente) {
@@ -132,6 +194,15 @@ public class SolicitudService {
         }
         if (nuevoCliente.getPassword() == null || nuevoCliente.getPassword().isBlank()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "La contraseña del nuevo cliente es obligatoria.");
+        }
+    }
+
+    private void validarDatosContenedorNuevo(ContenedorNuevoDTO nuevoContenedor) {
+        if (nuevoContenedor.getPeso() == null || nuevoContenedor.getPeso() <= 0) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "El peso del nuevo contenedor debe ser mayor a 0.");
+        }
+        if (nuevoContenedor.getVolumen() == null || nuevoContenedor.getVolumen() <= 0) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "El volumen del nuevo contenedor debe ser mayor a 0.");
         }
     }
 
