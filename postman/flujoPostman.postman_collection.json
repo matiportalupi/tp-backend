@@ -8,48 +8,185 @@
   "auth": {
     "type": "bearer",
     "bearer": [
-      {"key": "token", "value": "{{access_token}}", "type": "string"}
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
     ]
   },
   "variable": [
-    {"key": "gateway_base", "value": "http://localhost:8082/api/logistica"},
-    {"key": "solicitud_id", "value": "8"},
-    {"key": "tramo_id", "value": "12"},
-    {"key": "tramo_id_2", "value": "13"},
-    {"key": "camion_id", "value": "1"},
-    {"key": "deposito_id", "value": "2"},
-    {"key": "access_token", "value": ""}
+    {
+      "key": "gateway_base",
+      "value": "http://localhost:8082/api/logistica"
+    },
+    {
+      "key": "solicitud_id",
+      "value": "8"
+    },
+    {
+      "key": "tramo_id",
+      "value": "12"
+    },
+    {
+      "key": "tramo_id_2",
+      "value": "13"
+    },
+    {
+      "key": "camion_id",
+      "value": "1"
+    },
+    {
+      "key": "deposito_id",
+      "value": "2"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "keycloak_base",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "realm",
+      "value": "TPIBackend"
+    },
+    {
+      "key": "username",
+      "value": "admin"
+    },
+    {
+      "key": "password",
+      "value": "admin123"
+    }
   ],
   "item": [
     {
       "name": "1 - Crear solicitud",
       "request": {
         "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"contenedorId\": 10,\n  \"ciudadOrigenId\": 1,\n  \"ciudadDestinoId\": 3\n}"
         },
         "url": {
           "raw": "{{gateway_base}}/solicitudes",
-          "host": ["{{gateway_base}}"],
-          "path": ["solicitudes"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes"
+          ]
         }
-      }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Script para leer un NUEVO CLIENTE del body y crearlo en Keycloak.",
+              "const done = pm.globals.get('done');",
+              "",
+              "async function createClientFromRequest() {",
+              "    try {",
+              "        // Extraer datos del nuevo cliente desde el body de la petición",
+              "        const requestBody = JSON.parse(pm.request.body.raw);",
+              "        const newClient = requestBody.nuevoCliente;",
+              "",
+              "        if (!newClient || !newClient.email || !newClient.password) {",
+              "            console.log(\"No se encontró 'nuevoCliente' en el body. No se creará usuario en Keycloak.\");",
+              "            return; // No hace nada si no hay datos de cliente",
+              "        }",
+              "",
+              "        console.log(`Intentando crear usuario en Keycloak para: ${newClient.email}`);",
+              "",
+              "        // 1. Obtener token de admin para Keycloak",
+              "        const tokenResponse = await pm.sendRequest({",
+              "            url: `${pm.collectionVariables.get('keycloak_base')}/realms/master/protocol/openid-connect/token`,",
+              "            method: 'POST',",
+              "            header: {'Content-Type': 'application/x-www-form-urlencoded'},",
+              "            body: {",
+              "                mode: 'urlencoded',",
+              "                urlencoded: [",
+              "                    {key: 'client_id', value: 'admin-cli'},",
+              "                    {key: 'username', value: pm.collectionVariables.get('username')},",
+              "                    {key: 'password', value: pm.collectionVariables.get('password')},",
+              "                    {key: 'grant_type', value: 'password'}",
+              "                ]",
+              "            }",
+              "        });",
+              "        const adminToken = tokenResponse.json().access_token;",
+              "        console.log('✅ Token de admin de Keycloak obtenido.');",
+              "",
+              "        // 2. Crear usuario en Keycloak",
+              "        const createUserResponse = await pm.sendRequest({",
+              "            url: `${pm.collectionVariables.get('keycloak_base')}/admin/realms/${pm.collectionVariables.get('realm')}/users`,",
+              "            method: 'POST',",
+              "            header: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },",
+              "            body: {",
+              "                mode: 'raw',",
+              "                raw: JSON.stringify({",
+              "                    username: newClient.email,",
+              "                    email: newClient.email,",
+              "                    enabled: true,",
+              "                    credentials: [{type: 'password', value: newClient.password, temporary: false}]",
+              "                })",
+              "            }",
+              "        });",
+              "",
+              "        if (createUserResponse.code >= 300) {",
+              "            throw new Error(`Error al crear usuario en Keycloak: ${createUserResponse.status} - ${createUserResponse.text()}`);",
+              "        }",
+              "        console.log('✅ Usuario creado en Keycloak.');",
+              "",
+              "    } catch (err) {",
+              "        console.error('❌ Falló el script de pre-request:', err);",
+              "        // Detiene la ejecución de la petición principal si hay un error",
+              "        throw err;",
+              "    } finally {",
+              "        if (typeof done === 'function') {",
+              "            done();",
+              "        }",
+              "    }",
+              "}",
+              "",
+              "createClientFromRequest();"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "2 - Procesar solicitud",
       "request": {
         "method": "PUT",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
         },
         "url": {
           "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
-          "host": ["{{gateway_base}}"],
-          "path": ["solicitudes", "{{solicitud_id}}", "procesar-solicitud"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "procesar-solicitud"
+          ]
         }
       }
     },
@@ -59,8 +196,15 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id}}", "asignar-camion", "{{camion_id}}"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "asignar-camion",
+            "{{camion_id}}"
+          ]
         }
       }
     },
@@ -70,8 +214,14 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id}}", "iniciar"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "iniciar"
+          ]
         }
       }
     },
@@ -81,8 +231,14 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id}}", "finalizar"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id}}",
+            "finalizar"
+          ]
         }
       }
     },
@@ -92,8 +248,15 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id_2}}", "asignar-camion", "{{camion_id}}"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "asignar-camion",
+            "{{camion_id}}"
+          ]
         }
       }
     },
@@ -103,8 +266,14 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id_2}}", "iniciar"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "iniciar"
+          ]
         }
       }
     },
@@ -114,8 +283,14 @@
         "method": "POST",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "{{tramo_id_2}}", "finalizar"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "{{tramo_id_2}}",
+            "finalizar"
+          ]
         }
       }
     },
@@ -125,8 +300,14 @@
         "method": "PUT",
         "url": {
           "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
-          "host": ["{{gateway_base}}"],
-          "path": ["solicitudes", "{{solicitud_id}}", "finalizar"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "finalizar"
+          ]
         }
       }
     },
@@ -136,8 +317,13 @@
         "method": "GET",
         "url": {
           "raw": "{{gateway_base}}/solicitudes/pendientes",
-          "host": ["{{gateway_base}}"],
-          "path": ["solicitudes", "pendientes"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "pendientes"
+          ]
         }
       }
     },
@@ -147,8 +333,14 @@
         "method": "GET",
         "url": {
           "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
-          "host": ["{{gateway_base}}"],
-          "path": ["solicitudes", "{{solicitud_id}}", "resumen-cliente"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "solicitudes",
+            "{{solicitud_id}}",
+            "resumen-cliente"
+          ]
         }
       }
     },
@@ -158,8 +350,13 @@
         "method": "GET",
         "url": {
           "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
-          "host": ["{{gateway_base}}"],
-          "path": ["tramos-ruta", "mi-asignacion"]
+          "host": [
+            "{{gateway_base}}"
+          ],
+          "path": [
+            "tramos-ruta",
+            "mi-asignacion"
+          ]
         }
       }
     }
