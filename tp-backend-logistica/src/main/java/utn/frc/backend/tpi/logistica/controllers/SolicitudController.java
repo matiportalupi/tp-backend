@@ -109,7 +109,8 @@ public class SolicitudController {
         log.info("Recibida solicitud de traslado para contenedor {}", solicitudPeticionTrasladoDTO.getContenedorId());
         Solicitud solicitud = solicitudMapper.fromPeticionTrasladoDto(solicitudPeticionTrasladoDTO);
         Solicitud peticion = solicitudService.crearPeticionTraslado(solicitud,
-                solicitudPeticionTrasladoDTO.getNuevoCliente(), autHeader);
+                solicitudPeticionTrasladoDTO.getNuevoCliente(),
+                solicitudPeticionTrasladoDTO.getNuevoContenedor(), autHeader);
         SolicitudResumenDTO rtaDto = solicitudMapper.toResumenDto(peticion);
         return ResponseEntity.status(HttpStatus.CREATED).body(rtaDto);
     }

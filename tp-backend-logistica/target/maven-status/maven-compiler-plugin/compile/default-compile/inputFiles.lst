@@ -10,6 +10,7 @@
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/controllers/GeoController.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/TramoRutaDetalleDTO.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/CamionDto.java
+/Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/ContenedorNuevoDTO.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/DepositoDto.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/EstadoDto.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/config/RestTemplateConfig.java
@@ -42,4 +43,5 @@
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/services/TramoRutaService.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/EstadoSolicitudDto.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/TarifaDto.java
+/Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/ContenedorCreacionRequest.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/config/OpenApiConfig.java
