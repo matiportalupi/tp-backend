@@ -7,8 +7,8 @@ import utn.frc.backend.tpi.pedidos.models.Camion;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-17T22:05:00-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
+    date = "2025-11-18T20:05:17-0300",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251114-0430, environment: Java 21.0.7 (Oracle Corporation)"
 )
 @Component
 public class CamionMapperImpl implements CamionMapper {
@@ -21,13 +21,13 @@ public class CamionMapperImpl implements CamionMapper {
 
         CamionDTO camionDTO = new CamionDTO();
 
-        camionDTO.setId( camion.getId() );
+        camionDTO.setCapacidadContenedores( camion.getCapacidadContenedores() );
         camionDTO.setCapacidadPeso( camion.getCapacidadPeso() );
         camionDTO.setDisponibilidad( camion.isDisponibilidad() );
-        camionDTO.setVolumen( camion.getVolumen() );
-        camionDTO.setPatente( camion.getPatente() );
+        camionDTO.setId( camion.getId() );
         camionDTO.setModelo( camion.getModelo() );
-        camionDTO.setCapacidadContenedores( camion.getCapacidadContenedores() );
+        camionDTO.setPatente( camion.getPatente() );
+        camionDTO.setVolumen( camion.getVolumen() );
 
         return camionDTO;
     }
@@ -40,13 +40,13 @@ public class CamionMapperImpl implements CamionMapper {
 
         Camion camion = new Camion();
 
-        camion.setId( dto.getId() );
-        camion.setCapacidadPeso( dto.getCapacidadPeso() );
-        camion.setVolumen( dto.getVolumen() );
-        camion.setDisponibilidad( dto.isDisponibilidad() );
-        camion.setPatente( dto.getPatente() );
-        camion.setModelo( dto.getModelo() );
         camion.setCapacidadContenedores( dto.getCapacidadContenedores() );
+        camion.setCapacidadPeso( dto.getCapacidadPeso() );
+        camion.setDisponibilidad( dto.isDisponibilidad() );
+        camion.setId( dto.getId() );
+        camion.setModelo( dto.getModelo() );
+        camion.setPatente( dto.getPatente() );
+        camion.setVolumen( dto.getVolumen() );
 
         return camion;
     }
