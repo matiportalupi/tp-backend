@@ -10,7 +10,7 @@ import utn.frc.backend.tpi.logistica.models.TramoRuta;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-18T01:42:18-0300",
+    date = "2025-11-19T08:36:57-0300",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component

@@ -30,7 +30,7 @@ server:
   port: 8082
 
 seguridad:
-  desactivada: False
+  desactivada: true
 
 management:
   endpoints:

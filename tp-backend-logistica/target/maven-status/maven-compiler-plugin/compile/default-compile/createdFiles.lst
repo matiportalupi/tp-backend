@@ -11,6 +11,7 @@ utn/frc/backend/tpi/logistica/dtos/PorcesarSolicitudDto.class
 utn/frc/backend/tpi/logistica/models/Tarifa.class
 utn/frc/backend/tpi/logistica/interfaces/Ubicable.class
 utn/frc/backend/tpi/logistica/controllers/SolicitudController.class
+utn/frc/backend/tpi/logistica/config/OpenApiConfig.class
 utn/frc/backend/tpi/logistica/mappers/TramoRutaDetalleMapperImpl.class
 utn/frc/backend/tpi/logistica/mappers/TarifaMapper.class
 utn/frc/backend/tpi/logistica/config/RestTemplateConfig.class
