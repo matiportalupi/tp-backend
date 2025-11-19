@@ -115,6 +115,17 @@ public class ContenedorService {
     }
 
     public Contenedor actualizar(Long id, Contenedor contenedor) {
+        Contenedor existente = contenedorRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contenedor no encontrado"));
+
+        // Si no nos mandan estado/cliente (p.ej. desde Logística) conservamos los actuales
+        if (contenedor.getEstado() == null || contenedor.getEstado().getId() == null) {
+            contenedor.setEstado(existente.getEstado());
+        }
+        if (contenedor.getCliente() == null || contenedor.getCliente().getId() == null) {
+            contenedor.setCliente(existente.getCliente());
+        }
+
         validarContenedor(contenedor);
         contenedor.setId(id);
         return contenedorRepo.save(contenedor);
