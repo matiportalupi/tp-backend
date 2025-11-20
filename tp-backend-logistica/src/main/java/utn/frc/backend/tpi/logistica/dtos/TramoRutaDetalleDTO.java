@@ -1,6 +1,7 @@
 package utn.frc.backend.tpi.logistica.dtos;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,8 +21,8 @@ public class TramoRutaDetalleDTO implements Serializable {
     private Integer orden;
     private Double distancia;
     private Double tiempoEstimado;
-    private LocalDate fechaRealSalida;
-    private LocalDate fechaRealLlegada;
+    private LocalDateTime fechaRealSalida;
+    private LocalDateTime fechaRealLlegada;
     private LocalDate fechaEstimadaSalida;
     private LocalDate fechaEstimadaLlegada;
     private Double costoEstimado;

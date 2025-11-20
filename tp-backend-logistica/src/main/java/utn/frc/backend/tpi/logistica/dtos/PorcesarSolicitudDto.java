@@ -1,6 +1,7 @@
 package utn.frc.backend.tpi.logistica.dtos;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +16,6 @@ public class PorcesarSolicitudDto {
     private LocalDate fechaEstimadaDespacho;
     private Long camionId;
     private Long depositoId;
+    private List<Long> depositosIds;
 
 }

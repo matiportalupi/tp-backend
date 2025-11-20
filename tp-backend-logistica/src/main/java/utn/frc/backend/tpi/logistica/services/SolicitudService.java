@@ -1,6 +1,8 @@
 package utn.frc.backend.tpi.logistica.services;
 
 import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +24,9 @@ import utn.frc.backend.tpi.logistica.dtos.ContenedorDto;
 import utn.frc.backend.tpi.logistica.dtos.ContenedorNuevoDTO;
 import utn.frc.backend.tpi.logistica.dtos.EstadoSimpleDTO;
 import utn.frc.backend.tpi.logistica.dtos.PorcesarSolicitudDto;
+import utn.frc.backend.tpi.logistica.dtos.PorcesarSolicitudDto;
 import utn.frc.backend.tpi.logistica.dtos.SolicitudResumenClienteDTO;
 import utn.frc.backend.tpi.logistica.exceptions.BusinessException;
-import utn.frc.backend.tpi.logistica.mappers.SolicitudMapper;
 import utn.frc.backend.tpi.logistica.models.Solicitud;
 import utn.frc.backend.tpi.logistica.models.TramoRuta;
 import utn.frc.backend.tpi.logistica.repositories.SolicitudRepository;
@@ -46,9 +48,6 @@ public class SolicitudService {
 
     @Autowired
     TramoRutaService tramoRutaService;
-
-    @Autowired
-    private SolicitudMapper solicitudMapper;
 
     @Value("${servicio.pedidos.url:http://localhost:8082/api/pedidos}")
     private String baseUrl;
@@ -212,6 +211,35 @@ public class SolicitudService {
         }
     }
 
+    private List<Long> obtenerDepositosIntermedios(Solicitud solicitud) {
+        List<Long> depositos = solicitud.getDepositosIntermedios();
+        if (depositos == null || depositos.isEmpty()) {
+            if (solicitud.getDepositoId() != null) {
+                return List.of(solicitud.getDepositoId());
+            }
+            return Collections.emptyList();
+        }
+        return depositos;
+    }
+
+    private void aplicarDatosProcesamiento(PorcesarSolicitudDto dto, Solicitud solicitud) {
+        if (dto == null || solicitud == null) {
+            return;
+        }
+        solicitud.setCamionId(dto.getCamionId());
+        if (dto.getFechaEstimadaDespacho() != null) {
+            solicitud.setFechaEstimadaDespacho(dto.getFechaEstimadaDespacho());
+        }
+        List<Long> depositos = dto.getDepositosIds();
+        if ((depositos == null || depositos.isEmpty()) && dto.getDepositoId() != null) {
+            depositos = List.of(dto.getDepositoId());
+        }
+        if (depositos != null) {
+            solicitud.setDepositosIntermedios(new ArrayList<>(depositos));
+            solicitud.setDepositoId(depositos.isEmpty() ? null : depositos.get(0));
+        }
+    }
+
     public Solicitud procesarSolicitud(Solicitud solicitud, String autHeader) {
         CamionDto camion = prepararSolicitudParaProcesamiento(solicitud, autHeader, true);
 
@@ -226,7 +254,7 @@ public class SolicitudService {
     public Solicitud simularRuta(Long solicitudId, PorcesarSolicitudDto dto, String autHeader) {
         Solicitud original = obtenerPorId(solicitudId);
         Solicitud simulacion = clonarSolicitud(original);
-        solicitudMapper.actualizarDesdeProcesarDto(dto, simulacion);
+        aplicarDatosProcesamiento(dto, simulacion);
         prepararSolicitudParaProcesamiento(simulacion, autHeader, false);
         return simulacion;
     }
@@ -323,7 +351,7 @@ public class SolicitudService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,
                         "Solicitud no encontrada para el contenedor " + contenedorId));
 
-        return solicitud.getDepositoId() != null;
+        return !obtenerDepositosIntermedios(solicitud).isEmpty();
     }
 
     public List<Solicitud> obtenerSolicitudesSinCamion() {
@@ -397,6 +425,7 @@ public class SolicitudService {
         copia.setCiudadOrigenId(original.getCiudadOrigenId());
         copia.setContenedorId(original.getContenedorId());
         copia.setDepositoId(original.getDepositoId());
+        copia.setDepositosIntermedios(new ArrayList<>(obtenerDepositosIntermedios(original)));
         copia.setCamionId(original.getCamionId());
         copia.setFechaEstimadaDespacho(original.getFechaEstimadaDespacho());
         copia.setCostoEstimado(original.getCostoEstimado());
@@ -412,6 +441,10 @@ public class SolicitudService {
         if (validarFecha && solicitud.getFechaEstimadaDespacho() == null) {
             throw new IllegalArgumentException("La solicitud debe tener una fecha estimada de despacho.");
         }
+
+        List<Long> depositos = new ArrayList<>(obtenerDepositosIntermedios(solicitud));
+        solicitud.setDepositosIntermedios(depositos);
+        solicitud.setDepositoId(depositos.isEmpty() ? null : depositos.get(0));
 
         String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
         ContenedorDto contenedor = rt.getForObject(contenedorUrl, ContenedorDto.class);

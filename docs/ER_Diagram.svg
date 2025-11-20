@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+    <style>
+        .entity { fill:#f8f9fa; stroke:#2b2b2b; stroke-width:1.5 }
+        .title { font: 700 16px/20px 'Helvetica Neue', Arial, sans-serif; }
+        .field { font: 400 13px/18px 'Helvetica Neue', Arial, sans-serif; }
+        .note { font: 400 12px/16px 'Helvetica Neue', Arial, sans-serif; fill:#333 }
+        .link { stroke:#333; stroke-width:1.4; fill:none; marker-end:url(#arrow) }
+    </style>
+
+    <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#333" />
+        </marker>
+    </defs>
+
+    <!-- Left column: pedidos -->
+    <!-- Cliente -->
+    <g id="Cliente" transform="translate(40,40)">
+        <rect class="entity" width="320" height="90" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Cliente</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="66" class="field">nombre, email, password</text>
+    </g>
+
+    <!-- Contenedor -->
+    <g id="Contenedor" transform="translate(40,160)">
+        <rect class="entity" width="320" height="110" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Contenedor</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="66" class="field">peso, volumen</text>
+        <text x="12" y="86" class="field">estado (ManyToOne), cliente (ManyToOne)</text>
+    </g>
+
+    <!-- Estado -->
+    <g id="Estado" transform="translate(40,300)">
+        <rect class="entity" width="320" height="66" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Estado</text>
+        <text x="12" y="48" class="field">id: Long, nombre</text>
+    </g>
+
+    <!-- HistorialEstado -->
+    <g id="HistorialEstado" transform="translate(40,400)">
+        <rect class="entity" width="360" height="86" rx="6" ry="6" />
+        <text x="12" y="26" class="title">HistorialEstado</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="66" class="field">contenedor_id (FK), estado_id (FK), fechaCambio</text>
+    </g>
+
+    <!-- Ciudad -->
+    <g id="Ciudad" transform="translate(420,40)">
+        <rect class="entity" width="320" height="86" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Ciudad</text>
+        <text x="12" y="48" class="field">id: Long, nombre, latitud, longitud</text>
+    </g>
+
+    <!-- Deposito -->
+    <g id="Deposito" transform="translate(420,150)">
+        <rect class="entity" width="320" height="90" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Deposito</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="68" class="field">ciudad (ManyToOne), direccion, lat/long</text>
+    </g>
+
+    <!-- Camion -->
+    <g id="Camion" transform="translate(420,270)">
+        <rect class="entity" width="320" height="90" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Camion</text>
+        <text x="12" y="48" class="field">id, capacidadPeso, volumen, disponibilidad, patente,
+            modelo</text>
+    </g>
+
+    <!-- Tarifa -->
+    <g id="Tarifa" transform="translate(420,380)">
+        <rect class="entity" width="320" height="100" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Tarifa</text>
+        <text x="12" y="48" class="field">id, tipoTarifa, pesoMin/Max, volumenMin/Max</text>
+        <text x="12" y="68" class="field">costos: base, por_km, combustible, estadia</text>
+    </g>
+
+    <!-- Solicitud -->
+    <g id="Solicitud" transform="translate(780,40)">
+        <rect class="entity" width="420" height="210" rx="6" ry="6" />
+        <text x="12" y="26" class="title">Solicitud</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="68" class="field">contenedor_id, ciudad_origen_id, ciudad_destino_id</text>
+        <text x="12" y="88" class="field">deposito_id, depositos_intermedios (List&lt;Long&gt;)</text>
+        <text x="12" y="108" class="field">camion_id, costoEstimado, tiempoEstimadoHoras</text>
+        <text x="12" y="128" class="field">fechaEstimadaDespacho, esFinalizada, estadoSolicitud</text>
+        <text x="12" y="148" class="field">costoReal, tiempoRealHoras</text>
+    </g>
+
+    <!-- TramoRuta -->
+    <g id="TramoRuta" transform="translate(780,280)">
+        <rect class="entity" width="420" height="170" rx="6" ry="6" />
+        <text x="12" y="26" class="title">TramoRuta</text>
+        <text x="12" y="48" class="field">id: Long</text>
+        <text x="12" y="68" class="field">solicitud_id (ManyToOne), ubicacionOrigenId,
+            ubicacionDestinoId</text>
+        <text x="12" y="88" class="field">origenTipo, destinoTipo, orden, distancia</text>
+        <text x="12" y="108" class="field">fechas estimadas/real, costoEstimado, costoReal</text>
+        <text x="12" y="128" class="field">estadoTramo, camion_id, tiempoRealHoras</text>
+    </g>
+
+    <!-- Relationship lines -->
+    <path class="link" d="M 200 130 L 200 160" marker-end="url(#arrow)" />
+    <!-- Cliente -> Contenedor -->
+    <path class="link" d="M 200 100 L 200 160" />
+    <path class="link" d="M 200 200 L 200 250" />
+
+    <!-- Contenedor -> HistorialEstado -->
+    <path class="link" d="M 200 260 L 200 400" marker-end="url(#arrow)" />
+
+    <!-- Estado -> Contenedor -->
+    <path class="link" d="M 200 330 L 200 210" marker-end="url(#arrow)" />
+
+    <!-- Ciudad -> Deposito -->
+    <path class="link" d="M 580 82 L 580 150" marker-end="url(#arrow)" />
+
+    <!-- Solicitud -> TramoRuta -->
+    <path class="link" d="M 990 250 L 990 280" marker-end="url(#arrow)" />
+
+    <!-- Notes -->
+    <rect x="1220" y="480" width="340" height="120" rx="6" ry="6" fill="#fff7cd" stroke="#b48b00" />
+    <text x="1234" y="502" class="note">Notas:</text>
+    <text x="1234" y="522" class="note">- Algunos campos en `Solicitud` son solo ids (no relaciones
+        JPA).</text>
+    <text x="1234" y="542" class="note">- `Contenedor` tiene `estado` y `cliente` como @ManyToOne.</text>
+
+</svg>

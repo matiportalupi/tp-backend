@@ -34,7 +34,9 @@
     {"key": "solicitud_id", "value": "1"},
     {"key": "tarifa_id", "value": "1"},
     {"key": "client_secret", "value": "msdywX1vQ0Q4n7IE8hS69uIAkRMIalj9"},
-    {"key": "tramo_id", "value": "1"}
+    {"key": "tramo_id", "value": "1"},
+    {"key": "deposito_id_2", "value": "2"},
+    {"key": "tramo_id_2", "value": "2"}
   ],
   "item": [
     {
@@ -153,12 +155,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositosIds\": [{{deposito_id}}, {{deposito_id_2}}]\n}"
             },
             "url": {
-              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
+              "raw": "{{logistica_base}}/solicitudes/{{solicitud_id}}/procesar-solicitud",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "solicitudes",
@@ -180,7 +182,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositosIds\": [{{deposito_id}}, {{deposito_id_2}}]\n}"
             },
             "url": {
               "raw": "{{logistica_base}}/solicitudes/{{solicitud_id}}/simular-ruta",
@@ -196,13 +198,39 @@
           }
         },
         {
-          "name": "3 - Asignar camión (Tramo 1)",
+          "name": "4 - Listar contenedores pendientes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{logistica_base}}/solicitudes/pendientes?estado=PROGRAMADA&ubicacion=",
+              "host": [
+                "{{logistica_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "pendientes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "PROGRAMADA"
+                },
+                {
+                  "key": "ubicacion",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5 - Asignar camión a tramo",
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
+              "raw": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/asignar-camion/{{camion_id}}",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "tramos-ruta",
@@ -214,13 +242,23 @@
           }
         },
         {
-          "name": "4 - Iniciar tramo 1",
+          "name": "6 - Inicio de tramo",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2025-12-02T09:00:00\"\n}"
+            },
             "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/iniciar",
+              "raw": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/iniciar",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "tramos-ruta",
@@ -231,13 +269,23 @@
           }
         },
         {
-          "name": "5 - Finalizar tramo 1",
+          "name": "7 - Fin de tramo",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2025-12-03T15:00:00\"\n}"
+            },
             "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id}}/finalizar",
+              "raw": "{{logistica_base}}/tramos-ruta/{{tramo_id}}/finalizar",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "tramos-ruta",
@@ -248,65 +296,13 @@
           }
         },
         {
-          "name": "6 - Asignar camión (Tramo 2)",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/asignar-camion/{{camion_id}}",
-              "host": [
-                "{{gateway_base}}"
-              ],
-              "path": [
-                "tramos-ruta",
-                "{{tramo_id_2}}",
-                "asignar-camion",
-                "{{camion_id}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "7 - Iniciar tramo 2",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/iniciar",
-              "host": [
-                "{{gateway_base}}"
-              ],
-              "path": [
-                "tramos-ruta",
-                "{{tramo_id_2}}",
-                "iniciar"
-              ]
-            }
-          }
-        },
-        {
-          "name": "8 - Finalizar tramo 2",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/{{tramo_id_2}}/finalizar",
-              "host": [
-                "{{gateway_base}}"
-              ],
-              "path": [
-                "tramos-ruta",
-                "{{tramo_id_2}}",
-                "finalizar"
-              ]
-            }
-          }
-        },
-        {
-          "name": "9 - Finalizar solicitud",
+          "name": "8 - Finalizar solicitud",
           "request": {
             "method": "PUT",
             "url": {
-              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/finalizar",
+              "raw": "{{logistica_base}}/solicitudes/{{solicitud_id}}/finalizar",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "solicitudes",
@@ -317,13 +313,13 @@
           }
         },
         {
-          "name": "10 - Pendientes",
+          "name": "ADD - Pendientes (sin filtros)",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{gateway_base}}/solicitudes/pendientes",
+              "raw": "{{logistica_base}}/solicitudes/pendientes",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "solicitudes",
@@ -333,13 +329,13 @@
           }
         },
         {
-          "name": "11 - Resumen cliente",
+          "name": "ADD - Resumen cliente",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{gateway_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
+              "raw": "{{logistica_base}}/solicitudes/{{solicitud_id}}/resumen-cliente",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "solicitudes",
@@ -350,7 +346,7 @@
           }
         },
         {
-          "name": "2 - Consultar Estado Transporte",
+          "name": "ADD - Consultar estado del transporte",
           "request": {
             "method": "GET",
             "url": {
@@ -367,13 +363,13 @@
           }
         },
         {
-          "name": "12 - Mi asignación transportista",
+          "name": "ADD - Mi asignación transportista",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{gateway_base}}/tramos-ruta/mi-asignacion",
+              "raw": "{{logistica_base}}/tramos-ruta/mi-asignacion",
               "host": [
-                "{{gateway_base}}"
+                "{{logistica_base}}"
               ],
               "path": [
                 "tramos-ruta",
@@ -785,7 +781,7 @@
             {"name": "Contenedor tiene deposito", "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/contenedor/{{contenedor_id}}/tiene-deposito"}},
             {
               "name": "OBTENER SOLICITUDES PENDIENTES (con filtros de estado/ubicación)",
-              "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/pendientes?estado=PROGRAMADA&ubicacion="}
+              "request": {"method": "GET", "url": "{{logistica_base}}/solicitudes/pendientes?estado=BORRADOR&ubicacion="}
             },
             {
               "name": "CALCULAR COSTO REAL y Finalizar solicitud",

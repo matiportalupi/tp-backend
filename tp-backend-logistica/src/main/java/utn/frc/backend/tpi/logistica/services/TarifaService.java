@@ -130,8 +130,12 @@ public class TarifaService {
 
                 if (depositoIdAnterior != null && depositoIdAnterior.equals(depositoIdActual)
                         && esDeposito(depositoIdAnterior, autHeader)) {
-                    LocalDate llegada = tramoAnterior.getFechaRealLlegada();
-                    LocalDate salida = tramo.getFechaRealSalida();
+                    LocalDate llegada = tramoAnterior.getFechaRealLlegada() != null
+                            ? tramoAnterior.getFechaRealLlegada().toLocalDate()
+                            : null;
+                    LocalDate salida = tramo.getFechaRealSalida() != null
+                            ? tramo.getFechaRealSalida().toLocalDate()
+                            : null;
 
                     if (llegada != null && salida != null) {
                         long dias = ChronoUnit.DAYS.between(llegada, salida);

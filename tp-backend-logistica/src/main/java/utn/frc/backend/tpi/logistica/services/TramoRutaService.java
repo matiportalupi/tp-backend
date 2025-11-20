@@ -1,8 +1,11 @@
 package utn.frc.backend.tpi.logistica.services;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,65 +72,43 @@ public class TramoRutaService {
         log.debug("Generando tramos para solicitud {}", solicitud.getId());
 
         try {
-            if (solicitud.getDepositoId() != null) {
+            List<RutaStop> paradas = construirParadas(solicitud);
+            if (paradas.size() < 2) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "La solicitud necesita al menos origen y destino para generar tramos.");
+            }
 
-                // Tramo Ciudad → Depósito
-                TramoRutaDto tramo1Dto = geoService.calcularDistanciaCiudadADeposito(
-                        solicitud.getCiudadOrigenId(), solicitud.getDepositoId(), autHeader);
+            LocalDate fechaSalida = solicitud.getFechaEstimadaDespacho();
+            for (int i = 0; i < paradas.size() - 1; i++) {
+                RutaStop origen = paradas.get(i);
+                RutaStop destino = paradas.get(i + 1);
 
-                int diasEstimados1 = (int) Math.ceil(tramo1Dto.getTiempoEstimado() / 24);
+                TramoRutaDto tramoDto = geoService.calcularDistanciaFlexible(
+                        origen.id(), origen.tipo(), destino.id(), destino.tipo(), autHeader);
 
-                TramoRuta tramo1 = new TramoRuta();
-                tramo1.setOrden(1);
-                tramo1.setUbicacionOrigenId(solicitud.getCiudadOrigenId());
-                tramo1.setOrigenTipo("CIUDAD");
-                tramo1.setUbicacionDestinoId(solicitud.getDepositoId());
-                tramo1.setDestinoTipo("DEPOSITO");
-                tramo1.setDistancia(tramo1Dto.getDistancia());
-                tramo1.setTiempoEstimado(tramo1Dto.getTiempoEstimado());
-                tramo1.setFechaEstimadaSalida(solicitud.getFechaEstimadaDespacho());
-                tramo1.setFechaEstimadaLlegada(tramo1.getFechaEstimadaSalida().plusDays(diasEstimados1));
-                tramo1.setSolicitud(solicitud);
-                tramos.add(tramo1);
-
-                // Tramo Depósito → Ciudad destino
-                TramoRutaDto tramo2Dto = geoService.calcularDistanciaDepositoACiudad(
-                        solicitud.getDepositoId(), solicitud.getCiudadDestinoId(), autHeader);
-
-                int diasEstimados2 = (int) Math.ceil(tramo2Dto.getTiempoEstimado() / 24);
-
-                TramoRuta tramo2 = new TramoRuta();
-                tramo2.setOrden(2);
-                tramo2.setUbicacionOrigenId(solicitud.getDepositoId());
-                tramo2.setOrigenTipo("DEPOSITO");
-                tramo2.setUbicacionDestinoId(solicitud.getCiudadDestinoId());
-                tramo2.setDestinoTipo("CIUDAD");
-                tramo2.setDistancia(tramo2Dto.getDistancia());
-                tramo2.setTiempoEstimado(tramo2Dto.getTiempoEstimado());
-                tramo2.setFechaEstimadaSalida(tramo1.getFechaEstimadaLlegada().plusDays(1));
-                tramo2.setFechaEstimadaLlegada(tramo2.getFechaEstimadaSalida().plusDays(diasEstimados2));
-                tramo2.setSolicitud(solicitud);
-                tramos.add(tramo2);
-
-            } else {
-                // Tramo único Ciudad → Ciudad
-                TramoRutaDto tramoDto = geoService.calcularDistanciaEntreCiudades(
-                        solicitud.getCiudadOrigenId(), solicitud.getCiudadDestinoId(), autHeader);
-
-                int diasEstimados = (int) Math.ceil(tramoDto.getTiempoEstimado() / 24);
+                int diasEstimados = (int) Math.ceil(
+                        tramoDto.getTiempoEstimado() != null ? tramoDto.getTiempoEstimado() / 24 : 0);
+                if (diasEstimados <= 0) {
+                    diasEstimados = 1;
+                }
 
                 TramoRuta tramo = new TramoRuta();
-                tramo.setOrden(1);
-                tramo.setUbicacionOrigenId(solicitud.getCiudadOrigenId());
-                tramo.setOrigenTipo("CIUDAD");
-                tramo.setUbicacionDestinoId(solicitud.getCiudadDestinoId());
-                tramo.setDestinoTipo("CIUDAD");
+                tramo.setOrden(i + 1);
+                tramo.setUbicacionOrigenId(origen.id());
+                tramo.setOrigenTipo(origen.tipo());
+                tramo.setUbicacionDestinoId(destino.id());
+                tramo.setDestinoTipo(destino.tipo());
                 tramo.setDistancia(tramoDto.getDistancia());
                 tramo.setTiempoEstimado(tramoDto.getTiempoEstimado());
-                tramo.setFechaEstimadaSalida(solicitud.getFechaEstimadaDespacho());
-                tramo.setFechaEstimadaLlegada(tramo.getFechaEstimadaSalida().plusDays(diasEstimados));
+                tramo.setFechaEstimadaSalida(fechaSalida);
+                tramo.setFechaEstimadaLlegada(fechaSalida.plusDays(diasEstimados));
                 tramo.setSolicitud(solicitud);
                 tramos.add(tramo);
+
+                fechaSalida = tramo.getFechaEstimadaLlegada();
+                if ("DEPOSITO".equals(destino.tipo())) {
+                    fechaSalida = fechaSalida.plusDays(1);
+                }
             }
 
             return tramos;
@@ -139,9 +120,35 @@ public class TramoRutaService {
         }
     }
 
-    public long diferenciaEntreEstimadoReal(LocalDate estimado, LocalDate real) {
-        return ChronoUnit.DAYS.between(estimado, real);
+    private List<RutaStop> construirParadas(Solicitud solicitud) {
+        List<RutaStop> paradas = new ArrayList<>();
+        paradas.add(new RutaStop("CIUDAD", solicitud.getCiudadOrigenId()));
 
+        List<Long> depositos = solicitud.getDepositosIntermedios();
+        if ((depositos == null || depositos.isEmpty()) && solicitud.getDepositoId() != null) {
+            depositos = List.of(solicitud.getDepositoId());
+        }
+
+        if (depositos != null) {
+            for (Long depId : depositos) {
+                if (depId != null) {
+                    paradas.add(new RutaStop("DEPOSITO", depId));
+                }
+            }
+        }
+
+        paradas.add(new RutaStop("CIUDAD", solicitud.getCiudadDestinoId()));
+        return paradas;
+    }
+
+    private record RutaStop(String tipo, Long id) {
+    }
+
+    public long diferenciaEntreEstimadoReal(LocalDate estimado, LocalDateTime real) {
+        if (estimado == null || real == null) {
+            return 0;
+        }
+        return ChronoUnit.DAYS.between(estimado, real.toLocalDate());
     }
 
     public void actualizarFechasPorCambioEstado(HistorialEstadoDto dto) {
@@ -160,61 +167,93 @@ public class TramoRutaService {
         Solicitud solicitud = solicitudOp.get();
         List<TramoRuta> tramos = solicitud.getTramos();
 
-        // Estado: Retirado de origen
+        tramos.sort(Comparator.comparingInt(TramoRuta::getOrden));
 
-        if (estadoId == 1) {
-            long diasEstimados = Math.round(tramos.get(0).getTiempoEstimado() / 24.0);
-            tramos.get(0).setFechaRealSalida(fecha);
-            tramos.get(0).setFechaEstimadaLlegada(fecha.plusDays(diasEstimados));
-            if (tramos.size() >= 2) {
-                long diasEstimados1 = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
-                tramos.get(1).setFechaEstimadaSalida(tramos.get(0).getFechaEstimadaLlegada().plusDays(1));
-                tramos.get(1).setFechaEstimadaLlegada(tramos.get(1).getFechaEstimadaSalida().plusDays(diasEstimados1));
-            }
-
+        switch (estadoId.intValue()) {
+            case 1 -> manejarRetiroOrigen(tramos, fecha);
+            case 2 -> manejarEntregaDeposito(tramos, fecha);
+            case 3 -> manejarRetiroDeposito(tramos, fecha);
+            case 4 -> manejarEntregaDestino(tramos, fecha, solicitud);
+            default -> log.warn("Estado {} no manejado para actualización de fechas", estadoId);
         }
 
-        // Entregado en deposito
-        else if (estadoId == 2) {
-            long diasEstimados = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
-            tramos.get(0).setFechaRealLlegada(fecha);
-            tramos.get(1).setFechaEstimadaSalida(fecha.plusDays(1));
-            tramos.get(1).setFechaEstimadaLlegada(tramos.get(1).getFechaEstimadaSalida().plusDays(diasEstimados));
-
-        }
-
-        // Retirado de deposito
-
-        else if (estadoId == 3) {
-            long diasEstimados = Math.round(tramos.get(1).getTiempoEstimado() / 24.0);
-            tramos.get(1).setFechaRealSalida(fecha);
-            tramos.get(1).setFechaEstimadaLlegada(fecha.plusDays(diasEstimados));
-
-        }
-
-        // EntragadoEnDestino
-        else if (estadoId == 4) {
-            TramoRuta tramoFinal = tramos.size() == 2 ? tramos.get(1) : tramos.get(0);
-            tramoFinal.setFechaRealLlegada(fecha);
-            solicitud.setEsFinalizada(true);
-
-            // Calcular el costo real usando fechas reales
-            try {
-                double costoReal = solicitud.getCostoEstimado();
-                solicitud.setCostoEstimado(costoReal);
-            } catch (Exception e) {
-                log.error("Error al calcular el costo real para la solicitud {}", solicitud.getId(), e);
-            }
-
-        }
         solicitudRepository.save(solicitud);
         tramoRutaRepo.saveAll(tramos);
 
     }
 
+    private void manejarRetiroOrigen(List<TramoRuta> tramos, LocalDate fecha) {
+        if (tramos.isEmpty()) {
+            return;
+        }
+        TramoRuta primero = tramos.get(0);
+        primero.setFechaRealSalida(fecha != null ? fecha.atStartOfDay() : null);
+        actualizarLlegadaEstimadas(primero, fecha);
+    }
+
+    private void manejarEntregaDeposito(List<TramoRuta> tramos, LocalDate fecha) {
+        Optional<TramoRuta> tramoDeposito = tramos.stream()
+                .filter(t -> "DEPOSITO".equals(t.getDestinoTipo()) && t.getFechaRealLlegada() == null)
+                .findFirst();
+        tramoDeposito.ifPresent(tramo -> {
+            tramo.setFechaRealLlegada(fecha != null ? fecha.atStartOfDay() : null);
+            TramoRuta siguiente = buscarTramoPorOrden(tramos, tramo.getOrden() + 1);
+            if (siguiente != null && "DEPOSITO".equals(siguiente.getOrigenTipo())) {
+                siguiente.setFechaEstimadaSalida(fecha.plusDays(1));
+                actualizarLlegadaEstimadas(siguiente, siguiente.getFechaEstimadaSalida());
+            }
+        });
+    }
+
+    private void manejarRetiroDeposito(List<TramoRuta> tramos, LocalDate fecha) {
+        Optional<TramoRuta> tramo = tramos.stream()
+                .filter(t -> "DEPOSITO".equals(t.getOrigenTipo()) && t.getFechaRealSalida() == null)
+                .findFirst();
+        tramo.ifPresent(t -> {
+            t.setFechaRealSalida(fecha != null ? fecha.atStartOfDay() : null);
+            actualizarLlegadaEstimadas(t, fecha);
+        });
+    }
+
+    private void manejarEntregaDestino(List<TramoRuta> tramos, LocalDate fecha, Solicitud solicitud) {
+        Optional<TramoRuta> tramoDestino = tramos.stream()
+                .filter(t -> "CIUDAD".equals(t.getDestinoTipo()) && t.getFechaRealLlegada() == null)
+                .reduce((first, second) -> second);
+        tramoDestino.ifPresent(t -> {
+            t.setFechaRealLlegada(fecha != null ? fecha.atStartOfDay() : null);
+            solicitud.setEsFinalizada(true);
+        });
+    }
+
+    private void actualizarLlegadaEstimadas(TramoRuta tramo, LocalDate fechaSalida) {
+        if (tramo.getTiempoEstimado() != null) {
+            long diasEstimados = Math.max(1, Math.round(tramo.getTiempoEstimado() / 24.0));
+            tramo.setFechaEstimadaLlegada(fechaSalida.plusDays(diasEstimados));
+        }
+    }
+
+    private TramoRuta buscarTramoPorOrden(List<TramoRuta> tramos, int orden) {
+        return tramos.stream()
+                .filter(t -> t.getOrden() == orden)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private double calcularHorasReales(LocalDateTime salida, LocalDateTime llegada, Double tiempoEstimado) {
+        if (salida == null || llegada == null) {
+            return tiempoEstimado != null ? tiempoEstimado : 0.0;
+        }
+        Duration duracion = Duration.between(salida, llegada);
+        long minutos = duracion.toMinutes();
+        if (minutos <= 0) {
+            return tiempoEstimado != null ? tiempoEstimado : 0.0;
+        }
+        return minutos / 60.0;
+    }
+
     // === MÉTODOS PARA TRANSPORTISTA ===
 
-    public TramoRuta iniciarTramo(Long tramoId, String autHeader) {
+    public TramoRuta iniciarTramo(Long tramoId, String autHeader, LocalDateTime fechaManual) {
         TramoRuta tramo = tramoRutaRepo.findById(tramoId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Tramo no encontrado"));
 
@@ -224,12 +263,13 @@ public class TramoRutaService {
         }
 
         tramo.setEstadoTramo("INICIADO");
-        tramo.setFechaRealSalida(LocalDate.now());
+        LocalDateTime fechaSalida = fechaManual != null ? fechaManual : LocalDateTime.now();
+        tramo.setFechaRealSalida(fechaSalida);
         log.info("Tramo {} iniciado por transportista", tramoId);
         return tramoRutaRepo.save(tramo);
     }
 
-    public TramoRuta finalizarTramo(Long tramoId, String autHeader) {
+    public TramoRuta finalizarTramo(Long tramoId, String autHeader, LocalDateTime fechaManual) {
         TramoRuta tramo = tramoRutaRepo.findById(tramoId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Tramo no encontrado"));
 
@@ -239,11 +279,11 @@ public class TramoRutaService {
         }
 
         tramo.setEstadoTramo("FINALIZADO");
-        tramo.setFechaRealLlegada(LocalDate.now());
+        LocalDateTime fechaLlegada = fechaManual != null ? fechaManual : LocalDateTime.now();
+        tramo.setFechaRealLlegada(fechaLlegada);
 
-        // Calcular tiempo real en horas
-        long diasReales = ChronoUnit.DAYS.between(tramo.getFechaRealSalida(), tramo.getFechaRealLlegada());
-        tramo.setTiempoRealHoras((double) (diasReales * 24));
+        double horasReales = calcularHorasReales(tramo.getFechaRealSalida(), fechaLlegada, tramo.getTiempoEstimado());
+        tramo.setTiempoRealHoras(horasReales);
 
         log.info("Tramo {} finalizado por transportista", tramoId);
         return tramoRutaRepo.save(tramo);
