@@ -5,16 +5,15 @@ utn/frc/backend/tpi/logistica/dtos/DepositoDto.class
 utn/frc/backend/tpi/logistica/controllers/TramoRutaController.class
 utn/frc/backend/tpi/logistica/dtos/CiudadDto.class
 utn/frc/backend/tpi/logistica/dtos/SolicitudPeticionTrasladoDTO.class
-utn/frc/backend/tpi/logistica/controllers/TarifaController.class
 utn/frc/backend/tpi/logistica/mappers/SolicitudMapper.class
 utn/frc/backend/tpi/logistica/dtos/PorcesarSolicitudDto.class
 utn/frc/backend/tpi/logistica/models/Tarifa.class
 utn/frc/backend/tpi/logistica/dtos/ContenedorCreacionRequest.class
 utn/frc/backend/tpi/logistica/interfaces/Ubicable.class
-utn/frc/backend/tpi/logistica/controllers/SolicitudController.class
 utn/frc/backend/tpi/logistica/config/OpenApiConfig.class
 utn/frc/backend/tpi/logistica/mappers/TramoRutaDetalleMapperImpl.class
 utn/frc/backend/tpi/logistica/mappers/TarifaMapper.class
+utn/frc/backend/tpi/logistica/services/TramoRutaService$RutaStop.class
 utn/frc/backend/tpi/logistica/config/RestTemplateConfig.class
 utn/frc/backend/tpi/logistica/repositories/SolicitudRepository.class
 utn/frc/backend/tpi/logistica/dtos/SolicitudResumenDTO.class
@@ -22,8 +21,6 @@ utn/frc/backend/tpi/logistica/dtos/SolicitudResumenClienteDTO.class
 utn/frc/backend/tpi/logistica/mappers/SolicitudMapperImpl.class
 utn/frc/backend/tpi/logistica/mappers/TramoRutaDetalleMapper.class
 utn/frc/backend/tpi/logistica/repositories/TramoRutaRepository.class
-utn/frc/backend/tpi/logistica/services/SolicitudService.class
-utn/frc/backend/tpi/logistica/services/TarifaService.class
 utn/frc/backend/tpi/logistica/dtos/EstadoSolicitudDto.class
 utn/frc/backend/tpi/logistica/dtos/TramoRutaDetalleDTO.class
 utn/frc/backend/tpi/logistica/dtos/SolicitudDto.class

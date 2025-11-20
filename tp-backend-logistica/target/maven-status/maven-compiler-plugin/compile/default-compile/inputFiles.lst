@@ -1,4 +1,5 @@
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/ClienteNuevoDTO.java
+/Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/TramoEstadoRequest.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/dtos/SolicitudDto.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/models/Solicitud.java
 /Users/bisiojuan/Desktop/TrabajoPracticoBackend/Final/tp-backend/tp-backend-logistica/src/main/java/utn/frc/backend/tpi/logistica/exceptions/GlobalExceptionHandler.java

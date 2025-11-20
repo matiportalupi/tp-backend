@@ -1,6 +1,7 @@
 package utn.frc.backend.tpi.logistica.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,10 +52,10 @@ public class TramoRuta {
     private Double tiempoEstimado;
 
     @Column(name = "fecha_real_salida")
-    private LocalDate fechaRealSalida;
+    private LocalDateTime fechaRealSalida;
 
     @Column(name = "fecha_real_llegada")
-    private LocalDate fechaRealLlegada;
+    private LocalDateTime fechaRealLlegada;
 
     @Column(name = "fecha_estimada_salida")
     private LocalDate fechaEstimadaSalida;

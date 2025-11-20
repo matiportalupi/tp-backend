@@ -1,5 +1,8 @@
 package utn.frc.backend.tpi.logistica.mappers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 
 import utn.frc.backend.tpi.logistica.dtos.PorcesarSolicitudDto;
@@ -25,6 +28,16 @@ public interface SolicitudMapper {
     default void actualizarDesdeProcesarDto(PorcesarSolicitudDto dto, Solicitud solicitud) {
         solicitud.setCamionId(dto.getCamionId());
         solicitud.setFechaEstimadaDespacho(dto.getFechaEstimadaDespacho());
-        solicitud.setDepositoId(dto.getDepositoId());
+        List<Long> depositos = dto.getDepositosIds();
+        if ((depositos == null || depositos.isEmpty()) && dto.getDepositoId() != null) {
+            depositos = List.of(dto.getDepositoId());
+        }
+        if (depositos != null) {
+            solicitud.setDepositosIntermedios(new ArrayList<>(depositos));
+            solicitud.setDepositoId(depositos.isEmpty() ? null : depositos.get(0));
+        } else {
+            solicitud.setDepositosIntermedios(new ArrayList<>());
+            solicitud.setDepositoId(null);
+        }
     }
 }

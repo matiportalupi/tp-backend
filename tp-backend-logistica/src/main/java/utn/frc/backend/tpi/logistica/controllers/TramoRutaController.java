@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import utn.frc.backend.tpi.logistica.dtos.HistorialEstadoDto;
+import utn.frc.backend.tpi.logistica.dtos.TramoEstadoRequest;
 import utn.frc.backend.tpi.logistica.dtos.TramoRutaDetalleDTO;
 import utn.frc.backend.tpi.logistica.dtos.TramoRutaDto;
 import utn.frc.backend.tpi.logistica.mappers.TramoRutaDetalleMapper;
@@ -139,8 +140,10 @@ public class TramoRutaController {
     })
     public ResponseEntity<TramoRutaDetalleDTO> iniciarTramo(
             @PathVariable Long id,
-            @RequestHeader(value = "Authorization", required = false) String autHeader) {
-        TramoRuta tramo = tramoRutaService.iniciarTramo(id, autHeader);
+            @RequestHeader(value = "Authorization", required = false) String autHeader,
+            @RequestBody(required = false) TramoEstadoRequest request) {
+        TramoRuta tramo = tramoRutaService.iniciarTramo(id, autHeader,
+                request != null ? request.getFecha() : null);
         return ResponseEntity.ok(tramoRutaDetalleMapper.toDto(tramo));
     }
 
@@ -154,8 +157,10 @@ public class TramoRutaController {
     })
     public ResponseEntity<TramoRutaDetalleDTO> finalizarTramo(
             @PathVariable Long id,
-            @RequestHeader(value = "Authorization", required = false) String autHeader) {
-        TramoRuta tramo = tramoRutaService.finalizarTramo(id, autHeader);
+            @RequestHeader(value = "Authorization", required = false) String autHeader,
+            @RequestBody(required = false) TramoEstadoRequest request) {
+        TramoRuta tramo = tramoRutaService.finalizarTramo(id, autHeader,
+                request != null ? request.getFecha() : null);
         return ResponseEntity.ok(tramoRutaDetalleMapper.toDto(tramo));
     }
 

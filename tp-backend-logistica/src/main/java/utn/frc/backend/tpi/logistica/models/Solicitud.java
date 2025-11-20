@@ -1,10 +1,14 @@
 package utn.frc.backend.tpi.logistica.models;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import jakarta.persistence.CascadeType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -39,6 +43,11 @@ public class Solicitud {
 
     @Column(name = "deposito_id")
     private Long depositoId;
+
+    @ElementCollection
+    @CollectionTable(name = "solicitud_depositos", joinColumns = @JoinColumn(name = "solicitud_id"))
+    @Column(name = "deposito_id_intermedio")
+    private List<Long> depositosIntermedios = new ArrayList<>();
 
     @Column(name = "camion_id")
     private Long camionId;
