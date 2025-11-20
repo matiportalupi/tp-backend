@@ -1,5 +1,6 @@
 package utn.frc.backend.tpi.gateway.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +19,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.converter.Converter;
 
+import utn.frc.backend.tpi.gateway.security.CustomAccessDeniedHandler;
+import utn.frc.backend.tpi.gateway.security.CustomAuthenticationEntryPoint;
+
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
     @Value("${seguridad.desactivada:false}")
     private boolean seguridadDesactivada;
+
+    @Autowired
+    private CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
@@ -36,6 +46,9 @@ public class SecurityConfig {
 
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .authorizeExchange(exchange -> exchange
                         // === LOGISTICA - ESPECÍFICO (antes que lo genérico) ===
                         .pathMatchers("/api/logistica/tramos-ruta/observer/estado").permitAll()
@@ -57,7 +70,6 @@ public class SecurityConfig {
                         .hasAnyRole("operador", "admin")
                         .pathMatchers(HttpMethod.PUT, "/api/logistica/solicitudes/*/finalizar")
                         .hasAnyRole("operador", "admin")
-                        .pathMatchers("/api/logistica/solicitudes/*").hasAnyRole("cliente", "operador", "admin")
                         // === LOGISTICA - GENÉRICO (al final) ===
                         .pathMatchers("/api/logistica/**").hasRole("admin")
                         // === PEDIDOS ===

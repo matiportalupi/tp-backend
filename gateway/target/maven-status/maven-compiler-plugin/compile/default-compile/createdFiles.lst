@@ -1,2 +1,4 @@
 utn/frc/backend/tpi/gateway/GatewayApplication.class
+utn/frc/backend/tpi/gateway/security/CustomAccessDeniedHandler.class
+utn/frc/backend/tpi/gateway/security/CustomAuthenticationEntryPoint.class
 utn/frc/backend/tpi/gateway/config/SecurityConfig.class

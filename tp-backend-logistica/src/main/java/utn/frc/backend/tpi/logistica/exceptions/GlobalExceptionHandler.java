@@ -1,6 +1,8 @@
 package utn.frc.backend.tpi.logistica.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -8,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,6 +38,21 @@ public class GlobalExceptionHandler {
         log.warn("Error controlado: {}", ex.getReason());
         HttpStatus status = ex.getStatusCode() instanceof HttpStatus httpStatus ? httpStatus : HttpStatus.BAD_REQUEST;
         String message = ex.getReason() != null ? ex.getReason() : status.getReasonPhrase();
+        return buildResponse(status, message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(RestClientResponseException.class)
+    public ResponseEntity<ErrorResponse> handleRestClient(
+            RestClientResponseException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.resolve(ex.getRawStatusCode());
+        if (status == null) {
+            status = HttpStatus.BAD_GATEWAY;
+        }
+
+        String message = extractRemoteMessage(ex);
+        log.warn("Error propagado desde servicio remoto ({} {}): {}", ex.getRawStatusCode(), ex.getStatusText(), message);
         return buildResponse(status, message, request.getRequestURI());
     }
 
@@ -68,5 +87,29 @@ public class GlobalExceptionHandler {
                 path
         );
         return ResponseEntity.status(status).body(body);
+    }
+
+    private String extractRemoteMessage(RestClientResponseException ex) {
+        String responseBody = ex.getResponseBodyAsString();
+        if (responseBody == null || responseBody.isBlank()) {
+            return ex.getStatusText();
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(responseBody);
+            if (json.hasNonNull("message")) {
+                return json.get("message").asText();
+            }
+            if (json.hasNonNull("error")) {
+                return json.get("error").asText();
+            }
+            if (json.hasNonNull("detail")) {
+                return json.get("detail").asText();
+            }
+        } catch (Exception ignored) {
+            // Ignored: fallback to raw body below.
+        }
+        return responseBody;
     }
 }
