@@ -136,6 +136,22 @@ public class SolicitudController {
         return ResponseEntity.status(HttpStatus.CREATED).body(rtaDto);
     }
 
+    @PostMapping("/{id}/simular-ruta")
+    @Operation(summary = "[Flujo] Simular ruta propuesta", description = "Permite a operadores/administradores consultar los tramos tentativos, tiempo y costo estimados sin procesar la solicitud.",
+            tags = {"1 - Flujo - Solicitudes"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Simulación generada"),
+            @ApiResponse(responseCode = "400", description = "Datos incompletos o incompatibles"),
+            @ApiResponse(responseCode = "404", description = "Solicitud/camión/contenedor no encontrado"),
+            @ApiResponse(responseCode = "401", description = "No autorizado")
+    })
+    public ResponseEntity<SolicitudDto> simularRuta(@PathVariable Long id, @RequestBody PorcesarSolicitudDto dto,
+            @RequestHeader(value = "Authorization", required = false) String autHeader) {
+        log.info("Simulando ruta para solicitud {}", id);
+        Solicitud simulacion = solicitudService.simularRuta(id, dto, autHeader);
+        return ResponseEntity.ok(solicitudMapper.toDto(simulacion));
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar solicitud", description = "Actualiza manualmente los datos de una solicitud.", tags = {
             "2 - Complemento - Solicitudes" })

@@ -9,8 +9,8 @@ import utn.frc.backend.tpi.logistica.models.Solicitud;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-19T12:25:23-0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251023-0518, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-11-20T09:27:05-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Homebrew)"
 )
 @Component
 public class SolicitudMapperImpl implements SolicitudMapper {
@@ -26,15 +26,15 @@ public class SolicitudMapperImpl implements SolicitudMapper {
 
         SolicitudDto solicitudDto = new SolicitudDto();
 
-        solicitudDto.setCamionId( solicitud.getCamionId() );
-        solicitudDto.setCiudadDestinoId( solicitud.getCiudadDestinoId() );
-        solicitudDto.setCiudadOrigenId( solicitud.getCiudadOrigenId() );
-        solicitudDto.setContenedorId( solicitud.getContenedorId() );
-        solicitudDto.setCostoEstimado( solicitud.getCostoEstimado() );
-        solicitudDto.setDepositoId( solicitud.getDepositoId() );
-        solicitudDto.setFechaEstimadaDespacho( solicitud.getFechaEstimadaDespacho() );
         solicitudDto.setId( solicitud.getId() );
+        solicitudDto.setContenedorId( solicitud.getContenedorId() );
+        solicitudDto.setCiudadOrigenId( solicitud.getCiudadOrigenId() );
+        solicitudDto.setCiudadDestinoId( solicitud.getCiudadDestinoId() );
+        solicitudDto.setDepositoId( solicitud.getDepositoId() );
+        solicitudDto.setCamionId( solicitud.getCamionId() );
+        solicitudDto.setCostoEstimado( solicitud.getCostoEstimado() );
         solicitudDto.setTiempoEstimadoHoras( solicitud.getTiempoEstimadoHoras() );
+        solicitudDto.setFechaEstimadaDespacho( solicitud.getFechaEstimadaDespacho() );
         solicitudDto.setTramos( tramoRutaMapper.toDtoList( solicitud.getTramos() ) );
 
         return solicitudDto;
@@ -48,15 +48,15 @@ public class SolicitudMapperImpl implements SolicitudMapper {
 
         Solicitud solicitud = new Solicitud();
 
-        solicitud.setCamionId( dto.getCamionId() );
-        solicitud.setCiudadDestinoId( dto.getCiudadDestinoId() );
-        solicitud.setCiudadOrigenId( dto.getCiudadOrigenId() );
-        solicitud.setContenedorId( dto.getContenedorId() );
-        solicitud.setCostoEstimado( dto.getCostoEstimado() );
-        solicitud.setDepositoId( dto.getDepositoId() );
-        solicitud.setFechaEstimadaDespacho( dto.getFechaEstimadaDespacho() );
         solicitud.setId( dto.getId() );
+        solicitud.setContenedorId( dto.getContenedorId() );
+        solicitud.setCiudadOrigenId( dto.getCiudadOrigenId() );
+        solicitud.setCiudadDestinoId( dto.getCiudadDestinoId() );
+        solicitud.setDepositoId( dto.getDepositoId() );
+        solicitud.setCamionId( dto.getCamionId() );
+        solicitud.setCostoEstimado( dto.getCostoEstimado() );
         solicitud.setTiempoEstimadoHoras( dto.getTiempoEstimadoHoras() );
+        solicitud.setFechaEstimadaDespacho( dto.getFechaEstimadaDespacho() );
         solicitud.setTramos( tramoRutaMapper.toEntityList( dto.getTramos() ) );
 
         return solicitud;
@@ -70,10 +70,10 @@ public class SolicitudMapperImpl implements SolicitudMapper {
 
         SolicitudResumenDTO solicitudResumenDTO = new SolicitudResumenDTO();
 
-        solicitudResumenDTO.setCiudadDestinoId( solicitud.getCiudadDestinoId() );
-        solicitudResumenDTO.setCiudadOrigenId( solicitud.getCiudadOrigenId() );
-        solicitudResumenDTO.setContenedorId( solicitud.getContenedorId() );
         solicitudResumenDTO.setId( solicitud.getId() );
+        solicitudResumenDTO.setContenedorId( solicitud.getContenedorId() );
+        solicitudResumenDTO.setCiudadOrigenId( solicitud.getCiudadOrigenId() );
+        solicitudResumenDTO.setCiudadDestinoId( solicitud.getCiudadDestinoId() );
 
         return solicitudResumenDTO;
     }
