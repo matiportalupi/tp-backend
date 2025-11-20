@@ -9,6 +9,7 @@ utn/frc/backend/tpi/logistica/controllers/TarifaController.class
 utn/frc/backend/tpi/logistica/mappers/SolicitudMapper.class
 utn/frc/backend/tpi/logistica/dtos/PorcesarSolicitudDto.class
 utn/frc/backend/tpi/logistica/models/Tarifa.class
+utn/frc/backend/tpi/logistica/dtos/ContenedorCreacionRequest.class
 utn/frc/backend/tpi/logistica/interfaces/Ubicable.class
 utn/frc/backend/tpi/logistica/controllers/SolicitudController.class
 utn/frc/backend/tpi/logistica/config/OpenApiConfig.class
@@ -40,6 +41,7 @@ utn/frc/backend/tpi/logistica/dtos/ContenedorDto.class
 utn/frc/backend/tpi/logistica/dtos/CamionDto.class
 utn/frc/backend/tpi/logistica/mappers/TarifaMapperImpl.class
 utn/frc/backend/tpi/logistica/models/Solicitud.class
+utn/frc/backend/tpi/logistica/dtos/ContenedorNuevoDTO.class
 utn/frc/backend/tpi/logistica/dtos/TarifaDto.class
 utn/frc/backend/tpi/logistica/dtos/EstadoSimpleDTO.class
 utn/frc/backend/tpi/logistica/exceptions/BusinessException.class

@@ -1,5 +1,6 @@
 package utn.frc.backend.tpi.logistica.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +21,10 @@ import utn.frc.backend.tpi.logistica.dtos.ContenedorCreacionRequest;
 import utn.frc.backend.tpi.logistica.dtos.ContenedorDto;
 import utn.frc.backend.tpi.logistica.dtos.ContenedorNuevoDTO;
 import utn.frc.backend.tpi.logistica.dtos.EstadoSimpleDTO;
+import utn.frc.backend.tpi.logistica.dtos.PorcesarSolicitudDto;
 import utn.frc.backend.tpi.logistica.dtos.SolicitudResumenClienteDTO;
 import utn.frc.backend.tpi.logistica.exceptions.BusinessException;
+import utn.frc.backend.tpi.logistica.mappers.SolicitudMapper;
 import utn.frc.backend.tpi.logistica.models.Solicitud;
 import utn.frc.backend.tpi.logistica.models.TramoRuta;
 import utn.frc.backend.tpi.logistica.repositories.SolicitudRepository;
@@ -43,6 +46,9 @@ public class SolicitudService {
 
     @Autowired
     TramoRutaService tramoRutaService;
+
+    @Autowired
+    private SolicitudMapper solicitudMapper;
 
     @Value("${servicio.pedidos.url:http://localhost:8082/api/pedidos}")
     private String baseUrl;
@@ -207,65 +213,22 @@ public class SolicitudService {
     }
 
     public Solicitud procesarSolicitud(Solicitud solicitud, String autHeader) {
-        String token = autHeader.replace("Bearer ", "");
-        RestTemplate restTemplate = RestTemplateFactory.conToken(token);
-        if (solicitud.getFechaEstimadaDespacho() == null) {
-            throw new IllegalArgumentException("La solicitud debe tener una fecha estimada de despacho.");
-        }
+        CamionDto camion = prepararSolicitudParaProcesamiento(solicitud, autHeader, true);
 
-        // 1. Obtener contenedor
-        String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
-        ContenedorDto contenedor = restTemplate.getForObject(contenedorUrl, ContenedorDto.class);
-        if (contenedor == null) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Contenedor no encontrado");
-        }
-
-        validarContenedorTieneCliente(contenedor);
-
-        // 3. Obtener camión
-        String camionUrl = baseUrl + "/camiones/" + solicitud.getCamionId();
-        CamionDto camion = restTemplate.getForObject(camionUrl, CamionDto.class);
-        if (camion == null) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Camión no encontrado");
-        }
-
-        // 4. Validar disponibilidad del camión
-
-        if (!camion.isDisponibilidad()) {
-            throw new BusinessException(HttpStatus.CONFLICT, "El camión no está disponible");
-        }
-
-        // 5. Validar pesos
-        validarPesos(contenedor, camion);
-
-        // 6. Generar tramos
-        List<TramoRuta> tramos = tramoRutaService.generarTramos(solicitud, autHeader);
-        if (tramos == null || tramos.isEmpty()) {
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudieron generar tramos de ruta.");
-        }
-
-        solicitud.getTramos().clear();
-        for (TramoRuta tramo : tramos) {
-            tramo.setSolicitud(solicitud);
-            solicitud.getTramos().add(tramo);
-        }
-
-        // 7. Calcular costos y tiempos
-        double costo = tarifaService.calcularTarifaSolicitud(solicitud, autHeader);
-        solicitud.setCostoEstimado(costo);
-
-        double tiempoTotal = tramos.stream().filter(t -> t.getTiempoEstimado() != null)
-                .mapToDouble(TramoRuta::getTiempoEstimado).sum();
-        solicitud.setTiempoEstimadoHoras(tiempoTotal);
-
-        // 8. Marcar camión como no disponible
         camion.setDisponibilidad(false);
-        String actualizarCamionUrl = baseUrl + "/camiones/" + camion.getId();
-        restTemplate.put(actualizarCamionUrl, camion);
+        RestTemplate rt = RestTemplateFactory.conToken(autHeader.replace("Bearer ", ""));
+        rt.put(baseUrl + "/camiones/" + camion.getId(), camion);
 
-        // 9. Guardar solicitud
         log.info("Solicitud {} procesada. Camión asignado {}", solicitud.getId(), solicitud.getCamionId());
         return solicitudRepo.save(solicitud);
+    }
+
+    public Solicitud simularRuta(Long solicitudId, PorcesarSolicitudDto dto, String autHeader) {
+        Solicitud original = obtenerPorId(solicitudId);
+        Solicitud simulacion = clonarSolicitud(original);
+        solicitudMapper.actualizarDesdeProcesarDto(dto, simulacion);
+        prepararSolicitudParaProcesamiento(simulacion, autHeader, false);
+        return simulacion;
     }
 
     public Solicitud actualizar(Long id, Solicitud solicitud) {
@@ -425,6 +388,72 @@ public class SolicitudService {
                         || (s.getCiudadDestinoId() != null && destinoFiltro.equals(s.getCiudadDestinoId())))
                 .filter(s -> !s.isEsFinalizada())
                 .toList();
+    }
+
+    private Solicitud clonarSolicitud(Solicitud original) {
+        Solicitud copia = new Solicitud();
+        copia.setId(original.getId());
+        copia.setCiudadDestinoId(original.getCiudadDestinoId());
+        copia.setCiudadOrigenId(original.getCiudadOrigenId());
+        copia.setContenedorId(original.getContenedorId());
+        copia.setDepositoId(original.getDepositoId());
+        copia.setCamionId(original.getCamionId());
+        copia.setFechaEstimadaDespacho(original.getFechaEstimadaDespacho());
+        copia.setCostoEstimado(original.getCostoEstimado());
+        copia.setTiempoEstimadoHoras(original.getTiempoEstimadoHoras());
+        copia.setTramos(new ArrayList<>());
+        return copia;
+    }
+
+    private CamionDto prepararSolicitudParaProcesamiento(Solicitud solicitud, String autHeader, boolean validarFecha) {
+        String token = autHeader.replace("Bearer ", "");
+        RestTemplate rt = RestTemplateFactory.conToken(token);
+
+        if (validarFecha && solicitud.getFechaEstimadaDespacho() == null) {
+            throw new IllegalArgumentException("La solicitud debe tener una fecha estimada de despacho.");
+        }
+
+        String contenedorUrl = baseUrl + "/contenedores/" + solicitud.getContenedorId();
+        ContenedorDto contenedor = rt.getForObject(contenedorUrl, ContenedorDto.class);
+        if (contenedor == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Contenedor no encontrado");
+        }
+        validarContenedorTieneCliente(contenedor);
+
+        String camionUrl = baseUrl + "/camiones/" + solicitud.getCamionId();
+        CamionDto camion = rt.getForObject(camionUrl, CamionDto.class);
+        if (camion == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Camión no encontrado");
+        }
+        if (!camion.isDisponibilidad()) {
+            throw new BusinessException(HttpStatus.CONFLICT, "El camión no está disponible");
+        }
+
+        validarPesos(contenedor, camion);
+
+        List<TramoRuta> tramos = tramoRutaService.generarTramos(solicitud, autHeader);
+        if (tramos == null || tramos.isEmpty()) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudieron generar tramos de ruta.");
+        }
+
+        if (solicitud.getTramos() == null) {
+            solicitud.setTramos(new ArrayList<>());
+        } else {
+            solicitud.getTramos().clear();
+        }
+        for (TramoRuta tramo : tramos) {
+            tramo.setSolicitud(solicitud);
+            solicitud.getTramos().add(tramo);
+        }
+
+        double costo = tarifaService.calcularTarifaSolicitud(solicitud, autHeader);
+        solicitud.setCostoEstimado(costo);
+
+        double tiempoTotal = tramos.stream().filter(t -> t.getTiempoEstimado() != null)
+                .mapToDouble(TramoRuta::getTiempoEstimado).sum();
+        solicitud.setTiempoEstimadoHoras(tiempoTotal);
+
+        return camion;
     }
 
 }

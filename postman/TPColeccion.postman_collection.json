@@ -169,6 +169,33 @@
           }
         },
         {
+          "name": "3 - Consultar rutas tentativas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaEstimadaDespacho\": \"2025-12-01\",\n  \"camionId\": {{camion_id}},\n  \"depositoId\": {{deposito_id}}\n}"
+            },
+            "url": {
+              "raw": "{{logistica_base}}/solicitudes/{{solicitud_id}}/simular-ruta",
+              "host": [
+                "{{logistica_base}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitud_id}}",
+                "simular-ruta"
+              ]
+            }
+          }
+        },
+        {
           "name": "3 - Asignar camión (Tramo 1)",
           "request": {
             "method": "POST",
@@ -332,9 +359,9 @@
                 "{{pedidos_base}}"
               ],
               "path": [
-                "solicitudes",
+                "contenedores",
                 "{{solicitud_id}}",
-                "resumen-cliente"
+                "seguimiento"
               ]
             }
           }

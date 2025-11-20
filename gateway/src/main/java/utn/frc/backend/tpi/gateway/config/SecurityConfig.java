@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .hasAnyRole("operador", "admin")
                         .pathMatchers(HttpMethod.PUT, "/api/logistica/solicitudes/*/procesar-solicitud")
                         .hasAnyRole("operador", "admin")
+                        .pathMatchers(HttpMethod.POST, "/api/logistica/solicitudes/*/simular-ruta")
+                        .hasAnyRole("operador", "admin")
                         .pathMatchers(HttpMethod.PUT, "/api/logistica/solicitudes/*/finalizar")
                         .hasAnyRole("operador", "admin")
                         .pathMatchers("/api/logistica/solicitudes/*").hasAnyRole("cliente", "operador", "admin")
